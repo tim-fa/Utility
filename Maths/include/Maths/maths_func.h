@@ -4,7 +4,8 @@
 
 #define SP_PI 3.14159265358f
 
-namespace Yugen { namespace Maths {
+namespace Maths
+{
 
 	inline float toRadians(float degrees)
 	{
@@ -80,5 +81,4 @@ namespace Yugen { namespace Maths {
 	{
 		return (value > minimum) ? (value < maximum) ? value : maximum : minimum;
 	}
-
-} }
+}

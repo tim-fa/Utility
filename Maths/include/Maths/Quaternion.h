@@ -1,9 +1,9 @@
 #pragma once
 
-
 #include "mat4.h"
 
-namespace Yugen { namespace Maths {
+namespace Maths
+{
 
 	struct Quaternion
 	{
@@ -69,7 +69,7 @@ namespace Yugen { namespace Maths {
 		static Quaternion Identity();
 		static Quaternion FromEulerAngles(const vec3& angles);
 
-		static vec3 Rotate(const Quaternion & quat, const vec3 & vec);
+		static vec3 Rotate(const Quaternion& quat, const vec3& vec);
 
 		static const Quaternion Rotation(const vec3& unitVec0, const vec3& unitVec1);
 		static const Quaternion Rotation(float radians, const vec3& unitVec);
@@ -94,7 +94,5 @@ namespace Yugen { namespace Maths {
 
 		float Dot(const Quaternion& other) const;
 		Quaternion Conjugate() const;
-
 	};
-
-} }
+}

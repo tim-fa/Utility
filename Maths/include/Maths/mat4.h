@@ -5,7 +5,8 @@
 #include "maths_func.h"
 #include <ostream>
 
-namespace Yugen { namespace Maths {
+namespace Maths
+{
 
 	struct Quaternion;
 
@@ -39,8 +40,16 @@ namespace Yugen { namespace Maths {
 
 		vec4 GetColumn(int index) const;
 		void SetColumn(unsigned int index, const vec4& column);
-		inline vec3 GetPosition() const { return vec3(GetColumn(3)); }
-		inline void SetPosition(const vec3& position) { SetColumn(3, vec4(position, 1.0f)); }
+
+		inline vec3 GetPosition() const
+		{
+			return vec3(GetColumn(3));
+		}
+
+		inline void SetPosition(const vec3& position)
+		{
+			SetColumn(3, vec4(position, 1.0f));
+		}
 
 		static mat4 Orthographic(float left, float right, float bottom, float top, float near, float far);
 		static mat4 Perspective(float fov, float aspectRatio, float near, float far);
@@ -56,5 +65,4 @@ namespace Yugen { namespace Maths {
 
 		std::string ToString() const;
 	};
-
-} }
+}

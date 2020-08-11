@@ -10,7 +10,7 @@
 #include "termcolor/termcolor.hpp"
 
 // Local
-#include "Logger.h"
+#include "Log/Logger.h"
 
 static Yugen::Logger::LogLevel maxLoglevel = Yugen::Logger::LogLevel::debug;
 

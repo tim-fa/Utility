@@ -1,0 +1,9 @@
+[submodule "Log/dependencies/termcolor"]
+	path = Log/dependencies/termcolor
+	url = https://github.com/ikalnytskyi/termcolor.git
+[submodule "dependencies/fmt"]
+	path = dependencies/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "dependencies/termcolor"]
+	path = dependencies/termcolor
+	url = https://github.com/ikalnytskyi/termcolor.git
