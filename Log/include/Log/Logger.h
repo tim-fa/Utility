@@ -17,7 +17,7 @@ if (!(condition)) {                  \
 	__FILE__, __LINE__, __FUNCTION__, #condition, message);                                             \
 }
 
-namespace Yugen
+namespace Log
 {
 	class Logger
 	{
@@ -55,7 +55,6 @@ namespace Yugen
 			void f(const std::string& msg, Args ... args)
 			{
 				log(LogLevel::fatal, fmt::format(msg, args...));
-				exit(-1);
 			}
 
 			template<class ... Args>

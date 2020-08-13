@@ -12,17 +12,16 @@
 // Local
 #include "Log/Logger.h"
 
-static Yugen::Logger::LogLevel maxLoglevel = Yugen::Logger::LogLevel::debug;
+static Log::Logger::LogLevel maxLoglevel = Log::Logger::LogLevel::debug;
 
-namespace Yugen
+namespace Log
 {
-
 	Logger::Logger(const std::string& name)
 		: name(name)
 	{
 	}
 
-	std::string Logger::getLogLevelStr(Yugen::Logger::LogLevel level)
+	std::string Logger::getLogLevelStr(Logger::LogLevel level)
 	{
 		switch (level) {
 			case info:
@@ -40,7 +39,7 @@ namespace Yugen
 		}
 	}
 
-	void Logger::log(Yugen::Logger::LogLevel level, const std::string& msg)
+	void Logger::log(Logger::LogLevel level, const std::string& msg)
 	{
 		if (level > maxLoglevel) {
 			return;
@@ -65,6 +64,10 @@ namespace Yugen
 		std::cout << std::setw(10) << std::left << fmt::format("[{}]", getLogLevelStr(level));
 		std::cout << std::left << msg << std::endl;
 		std::cout << termcolor::reset;
+
+		if (level == LogLevel::fatal) {
+			throw std::runtime_error(fmt::format("{}: {}", name, msg));
+		}
 	}
 
 	void Logger::setName(const std::string& name)
