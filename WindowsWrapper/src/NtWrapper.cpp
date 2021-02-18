@@ -2,23 +2,27 @@
 
 #include <stdexcept>
 
-typedef ULONG(__stdcall* tNtVirtualProtect) (HANDLE ProcessHandle, IN OUT PVOID* BaseAddress, IN OUT PULONG  NumberOfBytesToProtect, IN ULONG NewAccessProtection, OUT PULONG OldAccessProtection);
-tNtVirtualProtect NtVirtualProtect;
+static bool isInitialized = false;
 
-void NtWrapper::init()
+typedef ULONG(__stdcall* tNtProtectVirtualMemory) (HANDLE ProcessHandle, IN OUT PVOID* BaseAddress, IN OUT PULONG  NumberOfBytesToProtect, IN ULONG NewAccessProtection, OUT PULONG OldAccessProtection);
+tNtProtectVirtualMemory NtProtectVirtualMemory;
+
+void init()
 {
 	auto ntHandle = GetModuleHandle("ntdll.dll");
 	if (ntHandle) {
 		auto address = (long)GetProcAddress(ntHandle, "NtProtectVirtualMemory");
 		if (address) {
-			NtVirtualProtect = (tNtVirtualProtect)address;
+			NtProtectVirtualMemory = (tNtProtectVirtualMemory)address;
 		}
 	}
 }
 
-ULONG NtWrapper::virtualProtect(void* source, size_t length, ULONG flags, ULONG& returnValue)
+ULONG WindowsWrapper::NtVirtualProtect(void* source, size_t length, ULONG flags, ULONG& returnValue)
 {
-	if (!NtVirtualProtect)
+	if(!isInitialized)
+		init();
+	if (!NtProtectVirtualMemory)
 		throw std::runtime_error("Couldn't access NtProtectVirtualMemory");
-	return NtVirtualProtect(((HANDLE)(LONG_PTR)-1), (void**)&source, (PULONG)&length, flags, &returnValue);
+	return NtProtectVirtualMemory(((HANDLE)(LONG_PTR)-1), (void**)&source, (PULONG)&length, flags, &returnValue);
 }

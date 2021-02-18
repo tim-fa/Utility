@@ -19,6 +19,8 @@ if (!(condition)) {                  \
 
 namespace Log
 {
+	extern void enableConsole();
+
 	class Logger
 	{
 		public:

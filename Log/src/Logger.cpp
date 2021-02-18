@@ -16,6 +16,12 @@ static Log::Logger::LogLevel maxLoglevel = Log::Logger::LogLevel::debug;
 
 namespace Log
 {
+	void enableConsole()
+	{
+		AllocConsole();
+		freopen("CONOUT$", "w", stdout);
+	}
+
 	Logger::Logger(const std::string& name)
 		: name(name)
 	{

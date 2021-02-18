@@ -6,25 +6,26 @@
 #include <vector>
 #include "InternalUtility.h"
 
+namespace Internals
+{
 template<typename Type>
-class AddressPointer {
-public:
-	template<typename... Args>
-	AddressPointer(Args... offsets);
-	void printPointerPath();
-	operator Type& () const;
-	Type operator=(const Type value);
-	long operator&();
-	Type* operator->();
+class AddressPointer
+{
+	public:
+		template<typename... Args>
+		AddressPointer(Args... offsets);
+		void printPointerPath();
+		operator Type&() const;
+		Type operator=(const Type value);
+		long operator&();
+		Type* operator->();
 
-private:
-	void addOffset(long offset);
+	private:
+		void addOffset(long offset);
 
-	std::vector<int> offsets;
-	long currentAddress;
+		std::vector<int> offsets;
+		long currentAddress;
 };
-
-
 
 template<typename Type>
 template<typename... Args>
@@ -43,7 +44,8 @@ inline void AddressPointer<Type>::printPointerPath()
 	int i = 0;
 	for (auto& offset : offsets) {
 		long pointedValue = *(long*)(currentAddress + offset);
-		printf("Level %2d: 0x%010X + 0x%05X [0x%010X] -> 0x%X (Decimal: %d)\n", i++, currentAddress, offset, currentAddress + offset, pointedValue, pointedValue);
+		printf("Level %2d: 0x%010X + 0x%05X [0x%010X] -> 0x%X (Decimal: %d)\n", i++, currentAddress, offset, currentAddress + offset, pointedValue,
+			pointedValue);
 		currentAddress = pointedValue;
 	}
 }
@@ -59,7 +61,7 @@ inline void AddressPointer<Type>::addOffset(long offset)
 }
 
 template<typename Type>
-inline AddressPointer<Type>::operator Type& () const
+inline AddressPointer<Type>::operator Type&() const
 {
 	return *(Type*)currentAddress;
 }
@@ -82,6 +84,6 @@ inline Type* AddressPointer<Type>::operator->()
 {
 	return (Type*)currentAddress;
 }
-
+}
 
 #endif
