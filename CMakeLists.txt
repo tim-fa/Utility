@@ -2,4 +2,5 @@ cmake_minimum_required(VERSION 3.11)
 
 add_subdirectory(Log)
 add_subdirectory(Maths)
-add_subdirectory(WindowsHooks)
+add_subdirectory(WindowsWrapper)
+add_subdirectory(InternalUtility)
