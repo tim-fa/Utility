@@ -24,8 +24,9 @@ class AddressPointer
 		void setValue(Type value);
 
 	private:
+		void initializePointer();
 		void addOffset(long offset);
-		long calculateAddress();
+		long currentAddress{0};
 		std::vector<int> offsets;
 };
 
@@ -58,22 +59,6 @@ inline void AddressPointer<Type>::addOffset(long offset)
 }
 
 template<typename Type>
-inline long AddressPointer<Type>::calculateAddress()
-{
-	long currentAddress = Internals::getModuleBase();
-	bool first = true;
-
-	for (auto& offset : offsets) {
-		if (!first) {
-			currentAddress = *(long*)currentAddress;
-		}
-		currentAddress = currentAddress + offset;
-		first = false;
-	}
-	return currentAddress;
-}
-
-template<typename Type>
 inline AddressPointer<Type>::operator Type&() const
 {
 	return *(Type*)getAddress();
@@ -101,13 +86,38 @@ inline Type* AddressPointer<Type>::operator->()
 template<typename Type>
 long AddressPointer<Type>::getAddress()
 {
-	return calculateAddress();
+	initializePointer();
+	return currentAddress;
 }
 
 template<typename Type>
 void AddressPointer<Type>::setValue(Type value)
 {
-	*(Type*)calculateAddress() = value;
+	initializePointer();
+	*(Type*)currentAddress = value;
+}
+
+template<typename Type>
+void AddressPointer<Type>::initializePointer()
+{
+	__try{
+		currentAddress = Internals::getModuleBase();
+		bool first = true;
+		for (auto& offset : offsets) {
+			if (!first) {
+				currentAddress = *(long*)currentAddress;
+			}
+			currentAddress = currentAddress + offset;
+			first = false;
+		}
+		*(long*)currentAddress -= 1;
+		*(long*)currentAddress += 1;
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		currentAddress = 0;
+		throw std::runtime_error("Access violation! Address is not (yet) accessible");
+	}
 }
 }
 
