@@ -7,8 +7,9 @@
 
 #include "Renderable.h"
 #include "Rectangle.h"
+#include "Color.h"
 
-namespace Renderer
+namespace Rendering
 {
 class Renderer
 {
@@ -28,7 +29,7 @@ class Renderer
 		void render();
 		void clear();
 
-		virtual void drawRect(Maths::vec2 position, Maths::vec2 dimensions, Maths::vec4 color) = 0;
+		virtual void drawRect(Maths::vec2 position, Maths::vec2 dimensions, const Renderables::Color& color) = 0;
 
 	private:
 		std::vector<std::shared_ptr<Renderables::Renderable>> m_renderables;

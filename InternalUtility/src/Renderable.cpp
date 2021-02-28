@@ -1,9 +1,9 @@
 #include "InternalUtility/Rendering/Renderable.h"
 
-namespace Renderables
+namespace Rendering::Renderables
 {
 
-Renderable::Renderable(RenderObjectType type, Maths::vec2 position, Maths::vec4 color)
+Renderable::Renderable(RenderObjectType type, Maths::vec2 position, const Color& color)
 	: m_position(position)
 	, m_color(color)
 	, m_type(type)
@@ -20,7 +20,7 @@ const Maths::vec2& Renderable::getPosition()
 	return m_position;
 }
 
-const Maths::vec4& Renderable::getColor()
+const Color& Renderable::getColor()
 {
 	return m_color;
 }

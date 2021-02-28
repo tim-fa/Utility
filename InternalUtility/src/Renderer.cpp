@@ -1,8 +1,8 @@
 #include "InternalUtility/Rendering/Renderer.h"
 
-using namespace Renderables;
+using namespace Rendering::Renderables;
 
-namespace Renderer
+namespace Rendering
 {
 
 void Renderer::render()

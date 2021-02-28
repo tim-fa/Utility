@@ -1,9 +1,9 @@
 #include "InternalUtility/Rendering/Rectangle.h"
 
-namespace Renderables
+namespace Rendering::Renderables
 {
 
-Rectangle::Rectangle(Maths::vec2 position, Maths::vec2 dimensions, Maths::vec4 color)
+Rectangle::Rectangle(Maths::vec2 position, Maths::vec2 dimensions, const Color& color)
 	: Renderable(RenderObjectType::Rectangle, position, color)
 	, m_dimensions(dimensions)
 {
