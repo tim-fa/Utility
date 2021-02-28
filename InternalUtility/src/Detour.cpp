@@ -1,4 +1,4 @@
-#include "InternalUtility/Detour.h"
+#include "InternalUtility/Memory/Detour.h"
 #include "WindowsWrapper/NtWrapper.h"
 
 namespace Internals

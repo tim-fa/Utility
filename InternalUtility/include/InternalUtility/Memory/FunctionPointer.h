@@ -13,9 +13,15 @@ template<typename ReturnType, typename... Arguments>
 class FunctionPointer
 {
 	public:
-		FunctionPointer(long offset)
+		FunctionPointer() = default;
+		explicit FunctionPointer(long offset)
 			: address(offset)
 		{
+		}
+
+		void initialize(long offset)
+		{
+			address.initialize(offset);
 		}
 
 		ReturnType operator()(Arguments... arguments)

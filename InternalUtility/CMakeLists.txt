@@ -12,4 +12,5 @@ target_include_directories(InternalUtility PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/in
 target_link_libraries(
 	InternalUtility PUBLIC
 	WindowsWrapper
+	Maths
 )

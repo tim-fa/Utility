@@ -8,12 +8,15 @@
 
 namespace Internals
 {
-template<typename Type>
+template<typename Type = long>
 class AddressPointer
 {
 	public:
+		AddressPointer() = default;
 		template<typename... Args>
 		explicit AddressPointer(Args... offsets);
+		template<typename... Args>
+		void initialize(Args... offsets);
 		void printPointerPath();
 		operator Type&() const;
 		AddressPointer<Type>& operator=(Type value);
@@ -34,9 +37,7 @@ template<typename Type>
 template<typename... Args>
 inline AddressPointer<Type>::AddressPointer(Args... offsets)
 {
-	for (long offset : {offsets...}) {
-		addOffset(offset);
-	}
+	initialize(offsets...);
 }
 
 template<typename Type>
@@ -49,6 +50,15 @@ inline void AddressPointer<Type>::printPointerPath()
 		printf("Level %2d: 0x%010X + 0x%05X [0x%010X] -> 0x%X (Decimal: %d)\n", i++, curAdr, offset, curAdr + offset, pointedValue,
 			pointedValue);
 		curAdr = pointedValue;
+	}
+}
+
+template<typename Type>
+template<typename... Args>
+void AddressPointer<Type>::initialize(Args... offsets)
+{
+	for (long offset : {offsets...}) {
+		addOffset(offset);
 	}
 }
 
@@ -110,8 +120,8 @@ void AddressPointer<Type>::initializePointer()
 			currentAddress = currentAddress + offset;
 			first = false;
 		}
-		*(long*)currentAddress -= 1;
-		*(long*)currentAddress += 1;
+		long test = *(long*)currentAddress;
+		
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -119,6 +129,7 @@ void AddressPointer<Type>::initializePointer()
 		throw std::runtime_error("Access violation! Address is not (yet) accessible");
 	}
 }
+
 }
 
 #endif
