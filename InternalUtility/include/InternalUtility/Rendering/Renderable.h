@@ -9,7 +9,8 @@ namespace Rendering::Renderables
 {
 enum class RenderObjectType
 {
-		Rectangle
+		Rectangle,
+		Text
 };
 
 class Renderable
