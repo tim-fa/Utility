@@ -8,6 +8,9 @@ namespace Rendering
 void Renderer::render()
 {
 	for (auto& r : m_renderables) {
+		if (!r->getEnabled()) {
+			continue;
+		}
 		auto type = r->getType();
 		if (type == RenderObjectType::Rectangle) {
 			auto rect = (Rectangle*)r.get();

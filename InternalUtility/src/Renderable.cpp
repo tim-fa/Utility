@@ -7,6 +7,7 @@ Renderable::Renderable(RenderObjectType type, Maths::vec2 position, const Color&
 	: m_position(position)
 	, m_color(color)
 	, m_type(type)
+	, m_enabled(true)
 {
 }
 
@@ -38,5 +39,15 @@ void Renderable::setXPos(float x)
 void Renderable::setYPos(float y)
 {
 	m_position.y = y;
+}
+
+const bool& Renderable::getEnabled() const
+{
+	return m_enabled;
+}
+
+void Renderable::setEnabled(bool enabled, bool applyForChildren)
+{
+	m_enabled = enabled;
 }
 }
