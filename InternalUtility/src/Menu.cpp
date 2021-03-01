@@ -48,6 +48,14 @@ Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::ve
 {
 }
 
+bool Menu::enable(bool enabled)
+{
+	auto affectedMenus = getSubmenusRecursive();
+	for (auto menu : affectedMenus) {
+		menu->setEnabled(enabled);
+	}
+}
+
 Menu::Setting* Menu::addSetting(const std::string& settingName)
 {
 	m_items.push_back(std::make_shared<Setting>(settingName, getItemDimensions(), getFontColor()));

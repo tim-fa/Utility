@@ -21,11 +21,8 @@ void Renderer::render()
 		} else if (type == RenderObjectType::Menu) {
 			auto menu = (Menu*)r.get();
 			for (auto& submenu : menu->getSubmenusRecursive()) {
-
-
-				drawRect(submenu->getPosition(), Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * (submenu->getItems().size() + 1.f)),
+				drawRect(submenu->getPosition(), Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * submenu->getItems().size()),
 					submenu->getColor());
-
 				int itemIndex = 1;
 				for (auto& item : submenu->getItems()) {
 					drawString(

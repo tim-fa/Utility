@@ -53,6 +53,8 @@ class Menu : public MenuItem, public Renderable
 
 		Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor);
 
+		bool enable(bool enabled);
+
 		Setting* addSetting(const std::string& settingName);
 		Menu* addSubmenu(const std::string& menuName);
 
