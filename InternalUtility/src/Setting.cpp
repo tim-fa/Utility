@@ -8,12 +8,12 @@ int clamp(int value, int min, int max)
 namespace Rendering::Renderables
 {
 
-bool Menu::Setting::isSetting()
+bool Setting::isSetting()
 {
 	return true;
 }
 
-void Menu::Setting::setValue(int value)
+void Setting::setValue(int value)
 {
 	int newVal = clamp(value, m_minValue, m_maxValue);
 	if (m_valueChangedCallback) {
@@ -22,7 +22,7 @@ void Menu::Setting::setValue(int value)
 	m_value = newVal;
 }
 
-void Menu::Setting::increaseValue()
+void Setting::increaseValue()
 {
 	int newVal = clamp(m_value + m_step, m_minValue, m_maxValue);
 	if (m_valueChangedCallback) {
@@ -31,7 +31,7 @@ void Menu::Setting::increaseValue()
 	m_value = newVal;
 }
 
-void Menu::Setting::decreaseValue()
+void Setting::decreaseValue()
 {
 	int newVal = clamp(m_value - m_step, m_minValue, m_maxValue);
 	if (m_valueChangedCallback) {
@@ -40,37 +40,37 @@ void Menu::Setting::decreaseValue()
 	m_value = newVal;
 }
 
-void Menu::Setting::setMaxValue(int value)
+void Setting::setMaxValue(int value)
 {
 	m_maxValue = value;
 }
 
-void Menu::Setting::setMinValue(int value)
+void Setting::setMinValue(int value)
 {
 	m_minValue = value;
 }
 
-void Menu::Setting::setStep(int value)
+void Setting::setStep(int value)
 {
 	m_step = value;
 }
 
-int Menu::Setting::getValue()
+int Setting::getValue()
 {
 	return m_value;
 }
 
-int Menu::Setting::getMinValue()
+int Setting::getMinValue()
 {
 	return m_minValue;
 }
 
-int Menu::Setting::getMaxValue()
+int Setting::getMaxValue()
 {
 	return m_maxValue;
 }
 
-int Menu::Setting::getStep()
+int Setting::getStep()
 {
 	return m_step;
 }

@@ -45,8 +45,8 @@ void Renderer::render()
 							Maths::vec2(submenu->getPosition().x + submenu->getItemDimensions().x - 70,
 								submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
 							Maths::vec2(1, 1),
-							fmt::format("[{: 2d}/{: 2d}]", item->convertTo<Renderables::Menu::Setting>()->getValue(),
-								item->convertTo<Renderables::Menu::Setting>()->getMaxValue()),
+							fmt::format("[{: 2d}/{: 2d}]", item->asSetting()->getValue(),
+								item->asSetting()->getMaxValue()),
 							FontStyle::Regular,
 							item->getFontColor());
 					}

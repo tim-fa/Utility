@@ -11,6 +11,8 @@
 namespace Rendering::Renderables
 {
 
+class Menu;
+
 class MenuItem
 {
 	public:
@@ -27,11 +29,8 @@ class MenuItem
 
 		virtual bool isSetting() = 0;
 
-		template<class Type>
-		Type* convertTo()
-		{
-			return (Type*)this;
-		}
+		class Menu* asMenu();
+		struct Setting* asSetting();
 
 	private:
 		std::string m_name;
@@ -40,43 +39,44 @@ class MenuItem
 		Color m_selectionColor;
 };
 
+struct Setting : public MenuItem
+{
+	public:
+		Setting(const std::string& name, int value, int minValue, int maxValue, int step, const std::function<void(int, int)>& onValueChanged,
+			const Maths::vec2& itemDimensions, const Color& fontColor, const Color& selectionColor)
+			: MenuItem(name, itemDimensions, fontColor, selectionColor)
+			, m_value(value)
+			, m_minValue(minValue)
+			, m_maxValue(maxValue)
+			, m_step(step)
+			, m_valueChangedCallback(onValueChanged)
+		{
+		}
+
+		void setValue(int value);
+		void increaseValue();
+		void decreaseValue();
+		void setMaxValue(int value);
+		void setMinValue(int value);
+		void setStep(int value);
+
+		int getValue();
+		int getMinValue();
+		int getMaxValue();
+		int getStep();
+
+		bool isSetting() override;
+	private:
+		int m_maxValue{};
+		int m_minValue{};
+		int m_step{};
+		int m_value{};
+		std::function<void(int oldValue, int newValue)> m_valueChangedCallback;
+};
+
 class Menu : public MenuItem, public Renderable
 {
 	public:
-		struct Setting : public MenuItem
-		{
-			public:
-				Setting(const std::string& name, int value, int minValue, int maxValue, int step, const std::function<void(int, int)>& onValueChanged,
-					const Maths::vec2& itemDimensions, const Color& fontColor, const Color& selectionColor)
-					: MenuItem(name, itemDimensions, fontColor, selectionColor)
-					, m_value(value)
-					, m_minValue(minValue)
-					, m_maxValue(maxValue)
-					, m_step(step)
-					, m_valueChangedCallback(onValueChanged)
-				{
-				}
-
-				void setValue(int value);
-				void increaseValue();
-				void decreaseValue();
-				void setMaxValue(int value);
-				void setMinValue(int value);
-				void setStep(int value);
-
-				int getValue();
-				int getMinValue();
-				int getMaxValue();
-				int getStep();
-
-				bool isSetting() override;
-			private:
-				int m_maxValue{};
-				int m_minValue{};
-				int m_step{};
-				int m_value{};
-				std::function<void(int oldValue, int newValue)> m_valueChangedCallback;
-		};
 
 		Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor,
 			const Color& selectionColor);
@@ -93,7 +93,7 @@ class Menu : public MenuItem, public Renderable
 		MenuItem* getSelectedItem();
 		std::vector<std::shared_ptr<MenuItem>>& getItems();
 		std::vector<Menu*> getSubmenusRecursive();
-		int getSelectedItemIndex();
+		int getSelectedItemIndex() const;
 
 		void setPosition(const Maths::vec2& position) override;
 		void setSelectedItemIndex(int index);
