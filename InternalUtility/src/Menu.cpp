@@ -61,11 +61,6 @@ Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::ve
 {
 }
 
-void Menu::enterSubmenu(const std::string& name)
-{
-	getSubmenu(name)->setEnabled(true);
-}
-
 Menu::Setting* Menu::addSetting(const std::string& settingName)
 {
 	m_items.push_back(std::make_shared<Setting>(settingName, getItemDimensions(), getFontColor(), getSelectionColor()));
@@ -146,6 +141,28 @@ int Menu::getSelectedItemIndex()
 
 void Menu::setSelectedItemIndex(int index)
 {
+	if (index < 0) {
+		index = 0;
+	}
+	if (index >= m_items.size()) {
+		index = static_cast<int>(m_items.size()) - 1;
+	}
 	m_selectedItemIndex = index;
+}
+
+Menu* Menu::getActiveMenu()
+{
+	Menu* result = this;
+	for (auto& menu : getSubmenusRecursive()) {
+		if (menu->getEnabled()) {
+			result = menu;
+		}
+	}
+	return result;
+}
+
+MenuItem* Menu::getSelectedItem()
+{
+	return m_items.at(m_selectedItemIndex).get();
 }
 }

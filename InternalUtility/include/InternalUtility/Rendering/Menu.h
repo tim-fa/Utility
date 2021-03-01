@@ -56,13 +56,14 @@ class Menu : public MenuItem, public Renderable
 		Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor,
 			const Color& selectionColor);
 
-		void enterSubmenu(const std::string& name);
+		Menu* getActiveMenu();
 
 		Setting* addSetting(const std::string& settingName);
 		Menu* addSubmenu(const std::string& menuName);
 
 		Setting* getSetting(const std::string& name);
 		Menu* getSubmenu(const std::string& name);
+		MenuItem* getSelectedItem();
 		std::vector<std::shared_ptr<MenuItem>>& getItems();
 		std::vector<Menu*> getSubmenusRecursive();
 		int getSelectedItemIndex();

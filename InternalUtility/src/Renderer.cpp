@@ -21,9 +21,13 @@ void Renderer::render()
 		} else if (type == RenderObjectType::Menu) {
 			auto menu = (Menu*)r.get();
 			for (auto& submenu : menu->getSubmenusRecursive()) {
+				if (!submenu->getEnabled()) {
+					continue;
+				}
 				drawRect(submenu->getPosition(), Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * submenu->getItems().size()),
 					submenu->getColor());
-				drawRect(Maths::vec2(submenu->getPosition().x, submenu->getPosition().y + submenu->getItemDimensions().y * (float)submenu->getSelectedItemIndex()),
+				drawRect(
+					Maths::vec2(submenu->getPosition().x, submenu->getPosition().y + submenu->getItemDimensions().y * (float)submenu->getSelectedItemIndex()),
 					submenu->getItemDimensions(),
 					submenu->getSelectionColor());
 				int itemIndex = 1;
