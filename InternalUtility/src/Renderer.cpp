@@ -40,17 +40,20 @@ void Renderer::render()
 						FontStyle::Regular,
 						item->getFontColor());
 
+					std::string itemOption;
 					if (item->isSetting()) {
-						drawString(
-							Maths::vec2(submenu->getPosition().x + submenu->getItemDimensions().x - 70,
-								submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
-							Maths::vec2(1, 1),
-							fmt::format("[{: 2d}/{: 2d}]", item->asSetting()->getValue(),
-								item->asSetting()->getMaxValue()),
-							FontStyle::Regular,
-							item->getFontColor());
+						itemOption = fmt::format("[{: 2d}/{: 2d}]", item->asSetting()->getValue(),
+							item->asSetting()->getMaxValue());
+					} else {
+						itemOption = "[->]";
 					}
-
+					drawString(
+						Maths::vec2(submenu->getPosition().x + submenu->getItemDimensions().x - 70,
+							submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
+						Maths::vec2(1, 1),
+						itemOption,
+						FontStyle::Regular,
+						item->getFontColor());
 					itemIndex++;
 				}
 			}
