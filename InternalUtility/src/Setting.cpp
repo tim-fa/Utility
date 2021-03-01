@@ -16,7 +16,7 @@ bool Setting::isSetting()
 void Setting::setValue(int value)
 {
 	int newVal = clamp(value, m_minValue, m_maxValue);
-	if (m_valueChangedCallback) {
+	if (m_valueChangedCallback && m_value != value) {
 		m_valueChangedCallback(m_value, newVal);
 	}
 	m_value = newVal;
@@ -25,7 +25,7 @@ void Setting::setValue(int value)
 void Setting::increaseValue()
 {
 	int newVal = clamp(m_value + m_step, m_minValue, m_maxValue);
-	if (m_valueChangedCallback) {
+	if (m_valueChangedCallback && m_value != newVal) {
 		m_valueChangedCallback(m_value, newVal);
 	}
 	m_value = newVal;
@@ -34,7 +34,7 @@ void Setting::increaseValue()
 void Setting::decreaseValue()
 {
 	int newVal = clamp(m_value - m_step, m_minValue, m_maxValue);
-	if (m_valueChangedCallback) {
+	if (m_valueChangedCallback && m_value != newVal) {
 		m_valueChangedCallback(m_value, newVal);
 	}
 	m_value = newVal;
