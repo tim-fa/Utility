@@ -5,10 +5,11 @@
 namespace Rendering::Renderables
 {
 
-MenuItem::MenuItem(const std::string& name, const Maths::vec2& itemDimensions, const Color& fontColor)
+MenuItem::MenuItem(const std::string& name, const Maths::vec2& itemDimensions, const Color& fontColor, const Color& selectionColor)
 	: m_name(name)
 	, m_itemDimensions(itemDimensions)
 	, m_fontColor(fontColor)
+	, m_selectionColor(selectionColor)
 {
 }
 
@@ -37,35 +38,46 @@ void MenuItem::setName(const std::string& name)
 	m_name = name;
 }
 
+const Color& MenuItem::getSelectionColor()
+{
+	return m_selectionColor;
+}
+
+void MenuItem::setSelectionColor(const Color& color)
+{
+	m_selectionColor = color;
+}
+
 bool Menu::Setting::isSetting()
 {
 	return true;
 }
 
-Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor)
+Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor,
+	const Color& selectionColor)
 	: Renderable(RenderObjectType::Menu, position, color)
-	, MenuItem(name, itemDimensions, fontColor)
+	, MenuItem(name, itemDimensions, fontColor, selectionColor)
+	, m_selectedItemIndex(0)
 {
 }
 
-bool Menu::enable(bool enabled)
+void Menu::enterSubmenu(const std::string& name)
 {
-	auto affectedMenus = getSubmenusRecursive();
-	for (auto menu : affectedMenus) {
-		menu->setEnabled(enabled);
-	}
+	getSubmenu(name)->setEnabled(true);
 }
 
 Menu::Setting* Menu::addSetting(const std::string& settingName)
 {
-	m_items.push_back(std::make_shared<Setting>(settingName, getItemDimensions(), getFontColor()));
+	m_items.push_back(std::make_shared<Setting>(settingName, getItemDimensions(), getFontColor(), getSelectionColor()));
 	return (Menu::Setting*)m_items.back().get();
 }
 
 Menu* Menu::addSubmenu(const std::string& menuName)
 {
 	m_items.push_back(
-		std::make_shared<Menu>(menuName, Maths::vec2(m_position.x + getItemDimensions().x, m_position.y), getItemDimensions(), getColor(), getFontColor()));
+		std::make_shared<Menu>(menuName, Maths::vec2(m_position.x + getItemDimensions().x, m_position.y), getItemDimensions(), getColor(), getFontColor(),
+			getSelectionColor()));
+	m_items.back()->convertTo<Menu>()->setEnabled(false);
 	return m_items.back()->convertTo<Menu>();
 }
 
@@ -125,5 +137,15 @@ std::vector<std::shared_ptr<MenuItem>>& Menu::getItems()
 bool Menu::isSetting()
 {
 	return false;
+}
+
+int Menu::getSelectedItemIndex()
+{
+	return m_selectedItemIndex;
+}
+
+void Menu::setSelectedItemIndex(int index)
+{
+	m_selectedItemIndex = index;
 }
 }

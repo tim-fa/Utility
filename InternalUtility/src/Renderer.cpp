@@ -23,6 +23,9 @@ void Renderer::render()
 			for (auto& submenu : menu->getSubmenusRecursive()) {
 				drawRect(submenu->getPosition(), Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * submenu->getItems().size()),
 					submenu->getColor());
+				drawRect(Maths::vec2(submenu->getPosition().x, submenu->getPosition().y + submenu->getItemDimensions().y * (float)submenu->getSelectedItemIndex()),
+					submenu->getItemDimensions(),
+					submenu->getSelectionColor());
 				int itemIndex = 1;
 				for (auto& item : submenu->getItems()) {
 					drawString(
