@@ -27,7 +27,7 @@ class Renderable
 		virtual void setPosition(const Maths::vec2& position);
 		virtual void setXPos(float x);
 		virtual void setYPos(float y);
-		void setEnabled(bool enabled, bool applyForChildren = false);
+		void setEnabled(bool enabled);
 
 	protected:
 		Maths::vec2 m_position;

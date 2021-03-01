@@ -46,7 +46,7 @@ const bool& Renderable::getEnabled() const
 	return m_enabled;
 }
 
-void Renderable::setEnabled(bool enabled, bool applyForChildren)
+void Renderable::setEnabled(bool enabled)
 {
 	m_enabled = enabled;
 }

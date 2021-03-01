@@ -1,4 +1,5 @@
 #include "InternalUtility/Rendering/Renderer.h"
+#include <fmt/format.h>
 
 using namespace Rendering::Renderables;
 
@@ -38,6 +39,17 @@ void Renderer::render()
 						item->getName(),
 						FontStyle::Regular,
 						item->getFontColor());
+
+					if (item->isSetting()) {
+						drawString(
+							Maths::vec2(submenu->getPosition().x + submenu->getItemDimensions().x - 70,
+								submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
+							Maths::vec2(1, 1),
+							fmt::format("[{: 2d}/{: 2d}]", item->convertTo<Renderables::Menu::Setting>()->getValue(),
+								item->convertTo<Renderables::Menu::Setting>()->getMaxValue()),
+							FontStyle::Regular,
+							item->getFontColor());
+					}
 
 					itemIndex++;
 				}

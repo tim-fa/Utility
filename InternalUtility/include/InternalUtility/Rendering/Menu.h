@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 #include <Maths/vec2.h>
 
@@ -45,20 +46,46 @@ class Menu : public MenuItem, public Renderable
 		struct Setting : public MenuItem
 		{
 			public:
-				Setting(const std::string& name, const Maths::vec2& itemDimensions, const Color& fontColor, const Color& selectionColor)
+				Setting(const std::string& name, int value, int minValue, int maxValue, int step, const std::function<void(int, int)>& onValueChanged,
+					const Maths::vec2& itemDimensions, const Color& fontColor, const Color& selectionColor)
 					: MenuItem(name, itemDimensions, fontColor, selectionColor)
+					, m_value(value)
+					, m_minValue(minValue)
+					, m_maxValue(maxValue)
+					, m_step(step)
+					, m_valueChangedCallback(onValueChanged)
 				{
 				}
 
+				void setValue(int value);
+				void increaseValue();
+				void decreaseValue();
+				void setMaxValue(int value);
+				void setMinValue(int value);
+				void setStep(int value);
+
+				int getValue();
+				int getMinValue();
+				int getMaxValue();
+				int getStep();
+
 				bool isSetting() override;
+			private:
+				int m_maxValue{};
+				int m_minValue{};
+				int m_step{};
+				int m_value{};
+				std::function<void(int oldValue, int newValue)> m_valueChangedCallback;
 		};
 
 		Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor,
 			const Color& selectionColor);
 
 		Menu* getActiveMenu();
+		void handleControls();
 
-		Setting* addSetting(const std::string& settingName);
+		Setting* addSetting(const std::string& settingName, int value = 0,int min = 0,int max = 1,int step = 1,
+			const std::function<void(int oldVal, int newVal)>& valueChangedCallback = nullptr);
 		Menu* addSubmenu(const std::string& menuName);
 
 		Setting* getSetting(const std::string& name);

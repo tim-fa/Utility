@@ -5,7 +5,7 @@ file(
 	src/*.cpp
 )
 
-add_library(InternalUtility STATIC ${SOURCE_FILES} src/Color.cpp include/InternalUtility/Rendering/Color.h)
+add_library(InternalUtility STATIC ${SOURCE_FILES})
 
 target_include_directories(InternalUtility PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

@@ -1,6 +1,7 @@
 #include "InternalUtility/Rendering/Menu.h"
 
 #include <fmt/format.h>
+#include <Windows.h>
 
 namespace Rendering::Renderables
 {
@@ -48,11 +49,6 @@ void MenuItem::setSelectionColor(const Color& color)
 	m_selectionColor = color;
 }
 
-bool Menu::Setting::isSetting()
-{
-	return true;
-}
-
 Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor,
 	const Color& selectionColor)
 	: Renderable(RenderObjectType::Menu, position, color)
@@ -61,9 +57,11 @@ Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::ve
 {
 }
 
-Menu::Setting* Menu::addSetting(const std::string& settingName)
+Menu::Setting* Menu::addSetting(const std::string& settingName, int value, int min, int max, int step,
+	const std::function<void(int oldVal, int newVal)>& valueChangedCallback)
 {
-	m_items.push_back(std::make_shared<Setting>(settingName, getItemDimensions(), getFontColor(), getSelectionColor()));
+	m_items.push_back(
+		std::make_shared<Setting>(settingName, value, min, max, step, valueChangedCallback, getItemDimensions(), getFontColor(), getSelectionColor()));
 	return (Menu::Setting*)m_items.back().get();
 }
 
@@ -144,7 +142,7 @@ void Menu::setSelectedItemIndex(int index)
 	if (index < 0) {
 		index = 0;
 	}
-	if (index >= m_items.size()) {
+	if (index >= static_cast<int>(m_items.size())) {
 		index = static_cast<int>(m_items.size()) - 1;
 	}
 	m_selectedItemIndex = index;
@@ -164,5 +162,34 @@ Menu* Menu::getActiveMenu()
 MenuItem* Menu::getSelectedItem()
 {
 	return m_items.at(m_selectedItemIndex).get();
+}
+
+void Menu::handleControls()
+{
+	auto currentMenu = getActiveMenu();
+	if (GetAsyncKeyState(VK_DELETE) & 1) {
+		setEnabled(!getEnabled());
+	}
+	if (getEnabled()) {
+		if (GetAsyncKeyState(VK_DOWN) & 1) {
+			currentMenu->setSelectedItemIndex(currentMenu->getSelectedItemIndex() + 1);
+		}
+		if (GetAsyncKeyState(VK_UP) & 1) {
+			currentMenu->setSelectedItemIndex(currentMenu->getSelectedItemIndex() - 1);
+		}
+		if (GetAsyncKeyState(VK_RIGHT) & 1) {
+			if (!currentMenu->getSelectedItem()->isSetting()) {
+				currentMenu->getSelectedItem()->convertTo<Menu>()->setEnabled(true);
+			} else {
+				currentMenu->getSelectedItem()->convertTo<Setting>()->increaseValue();
+			}
+		}
+		if (GetAsyncKeyState(VK_LEFT) & 1 && currentMenu->getSelectedItem()->isSetting()) {
+			currentMenu->getSelectedItem()->convertTo<Setting>()->decreaseValue();
+		}
+		if (GetAsyncKeyState(VK_ESCAPE) & 1) {
+			currentMenu->setEnabled(false);
+		}
+	}
 }
 }
