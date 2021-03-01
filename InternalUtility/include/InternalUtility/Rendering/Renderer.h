@@ -9,6 +9,7 @@
 #include "Rectangle.h"
 #include "Text.h"
 #include "Color.h"
+#include "Menu.h"
 
 namespace Rendering
 {
@@ -16,14 +17,14 @@ class Renderer
 {
 	public:
 		template<class RenderableType>
-		RenderableType* addRenderable(RenderableType&& r)
+		RenderableType* addRenderable(const RenderableType& r)
 		{
 			m_renderables.push_back(std::make_shared<RenderableType>(r));
 			return (RenderableType*)m_renderables.back().get();
 		}
 
 		template<class RenderableType>
-		RenderableType* operator<<(RenderableType&& r)
+		RenderableType* operator<<(const RenderableType& r)
 		{
 			m_renderables.push_back(std::make_shared<RenderableType>(r));
 			return (RenderableType*)m_renderables.back().get();

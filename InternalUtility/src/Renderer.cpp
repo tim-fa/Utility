@@ -18,6 +18,26 @@ void Renderer::render()
 		} else if (type == RenderObjectType::Text) {
 			auto text = (Text*)r.get();
 			drawString(text->getPosition(), text->getScale(), text->getText(), text->getStyle(), text->getColor());
+		} else if (type == RenderObjectType::Menu) {
+			auto menu = (Menu*)r.get();
+			for (auto& submenu : menu->getSubmenusRecursive()) {
+
+
+				drawRect(submenu->getPosition(), Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * (submenu->getItems().size() + 1.f)),
+					submenu->getColor());
+
+				int itemIndex = 1;
+				for (auto& item : submenu->getItems()) {
+					drawString(
+						Maths::vec2(submenu->getPosition().x, submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
+						Maths::vec2(1, 1),
+						item->getName(),
+						FontStyle::Regular,
+						item->getFontColor());
+
+					itemIndex++;
+				}
+			}
 		}
 	}
 }

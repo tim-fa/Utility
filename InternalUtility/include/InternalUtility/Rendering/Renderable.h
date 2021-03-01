@@ -10,7 +10,8 @@ namespace Rendering::Renderables
 enum class RenderObjectType
 {
 		Rectangle,
-		Text
+		Text,
+		Menu
 };
 
 class Renderable
@@ -23,12 +24,10 @@ class Renderable
 		const RenderObjectType& getType();
 		const bool& getEnabled() const;
 
-		void setPosition(const Maths::vec2& position);
-		void setXPos(float x);
-		void setYPos(float y);
+		virtual void setPosition(const Maths::vec2& position);
+		virtual void setXPos(float x);
+		virtual void setYPos(float y);
 		void setEnabled(bool enabled, bool applyForChildren = false);
-
-
 
 	protected:
 		Maths::vec2 m_position;
@@ -36,5 +35,4 @@ class Renderable
 		RenderObjectType m_type;
 		bool m_enabled;
 };
-
 }

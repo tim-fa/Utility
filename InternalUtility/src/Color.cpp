@@ -1,4 +1,4 @@
-#include "Color.h"
+#include "InternalUtility/Rendering/Color.h"
 
 namespace Rendering::Renderables
 {

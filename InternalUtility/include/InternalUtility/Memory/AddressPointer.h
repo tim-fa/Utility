@@ -18,10 +18,11 @@ class AddressPointer
 		template<typename... Args>
 		void initialize(Args... offsets);
 		void printPointerPath();
-		operator Type&() const;
+		operator Type&();
 		AddressPointer<Type>& operator=(Type value);
 		long operator&();
 		Type* operator->();
+		Type& operator[](int index);
 
 		long getAddress();
 		void setValue(Type value);
@@ -69,7 +70,7 @@ inline void AddressPointer<Type>::addOffset(long offset)
 }
 
 template<typename Type>
-inline AddressPointer<Type>::operator Type&() const
+inline AddressPointer<Type>::operator Type&()
 {
 	return *(Type*)getAddress();
 }
@@ -91,6 +92,12 @@ template<typename Type>
 inline Type* AddressPointer<Type>::operator->()
 {
 	return (Type*)getAddress();
+}
+
+template<typename Type>
+inline Type& AddressPointer<Type>::operator[](int index)
+{
+	return *(Type*)(getAddress() + sizeof(Type));
 }
 
 template<typename Type>
@@ -120,8 +127,9 @@ void AddressPointer<Type>::initializePointer()
 			currentAddress = currentAddress + offset;
 			first = false;
 		}
-		long test = *(long*)currentAddress;
-		
+		*(long*)currentAddress++;
+		*(long*)currentAddress--;
+
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -129,7 +137,6 @@ void AddressPointer<Type>::initializePointer()
 		throw std::runtime_error("Access violation! Address is not (yet) accessible");
 	}
 }
-
 }
 
 #endif
