@@ -22,7 +22,7 @@ class AddressPointer
 		AddressPointer<Type>& operator=(Type value);
 		long operator&();
 		Type* operator->();
-		Type& operator[](int index);
+		Type* operator[](int index);
 
 		long getAddress();
 		void setValue(Type value);
@@ -95,9 +95,9 @@ inline Type* AddressPointer<Type>::operator->()
 }
 
 template<typename Type>
-inline Type& AddressPointer<Type>::operator[](int index)
+inline Type* AddressPointer<Type>::operator[](int index)
 {
-	return *(Type*)(getAddress() + sizeof(Type));
+	return (Type*)(getAddress() + sizeof(Type) * index);
 }
 
 template<typename Type>
