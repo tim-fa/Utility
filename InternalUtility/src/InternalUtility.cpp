@@ -2,7 +2,7 @@
 
 namespace Internals
 {
-PEB* Internals::getPeb()
+PEB* getPeb()
 {
 #ifdef _WIN64
 	PEB* peb = (PEB*)__readgsqword(0x60);
@@ -14,8 +14,8 @@ PEB* Internals::getPeb()
 	return peb;
 }
 
-long Internals::getModuleBase()
+long getModuleBase()
 {
-	return (long)getPeb()->Reserved3[1];
+	return (long)(size_t)getPeb()->Reserved3[1];
 }
 }

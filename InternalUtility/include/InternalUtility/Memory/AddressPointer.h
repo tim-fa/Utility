@@ -4,7 +4,11 @@
 #define ADDRESS_PTR_H
 
 #include <vector>
+#include <stdexcept>
+#include <exception>
 #include "InternalUtility.h"
+
+#undef __try
 
 namespace Internals
 {
@@ -56,9 +60,9 @@ inline void AddressPointer<Type>::printPointerPath()
 
 template<typename Type>
 template<typename... Args>
-void AddressPointer<Type>::initialize(Args... offsets)
+void AddressPointer<Type>::initialize(Args... offs)
 {
-	for (long offset : {offsets...}) {
+	for (long offset : {offs...}) {
 		addOffset(offset);
 	}
 }
@@ -117,7 +121,7 @@ void AddressPointer<Type>::setValue(Type value)
 template<typename Type>
 void AddressPointer<Type>::initializePointer()
 {
-	__try{
+	__try {
 		currentAddress = Internals::getModuleBase();
 		bool first = true;
 		for (auto& offset : offsets) {
@@ -131,7 +135,7 @@ void AddressPointer<Type>::initializePointer()
 		*(long*)currentAddress--;
 
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER)
+	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
 		currentAddress = 0;
 		throw std::runtime_error("Access violation! Address is not (yet) accessible");

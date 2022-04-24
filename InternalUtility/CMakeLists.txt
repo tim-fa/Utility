@@ -13,5 +13,5 @@ target_link_libraries(
 	InternalUtility PUBLIC
 	WindowsWrapper
 	Maths
-	fmt::fmt
+	fmt
 )
