@@ -20,11 +20,6 @@ const FontStyle& Text::getStyle()
 	return m_style;
 }
 
-void Text::setText(const std::string& text)
-{
-	m_text = text;
-}
-
 void Text::setStyle(const FontStyle& style)
 {
 	m_style = style;

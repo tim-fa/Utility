@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <fmt/format.h>
 #include "Renderable.h"
 
 namespace Rendering::Renderables
@@ -20,8 +21,12 @@ struct Text : public Renderable
 		const Maths::vec2& getScale();
 		const FontStyle& getStyle();
 
-		void setText(const std::string& text);
-		void setScale(const Maths::vec2& scale);
+        template<class ... Args>
+		void setText(const std::string& text, Args ... args) {
+            m_text = fmt::format(text, args...);
+        }
+
+    void setScale(const Maths::vec2& scale);
 		void setStyle(const FontStyle& style);
 
 	private:
