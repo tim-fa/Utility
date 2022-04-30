@@ -7,32 +7,32 @@
 #include "InternalUtility.h"
 #include "AddressPointer.h"
 
-namespace Internals
-{
-template<typename ReturnType, typename... Arguments>
-class FunctionPointer
-{
-	public:
-		FunctionPointer() = default;
-		explicit FunctionPointer(long offset)
-			: address(offset)
-		{
-		}
+namespace Internals {
+    template<typename ReturnType, typename... Arguments>
+    class FunctionPointer {
+    public:
+        FunctionPointer() = default;
 
-		void initialize(long offset)
-		{
-			address.initialize(offset);
-		}
+        explicit FunctionPointer(long offset)
+                : address(offset) {
+        }
 
-		ReturnType operator()(Arguments... arguments)
-		{
-			ReturnType (* func)(Arguments...) = ((ReturnType(*)(Arguments...))&address);
-			return func(arguments...);
-		}
+        void initialize(long offset) {
+            address.initialize(offset);
+        }
 
-	private:
-		AddressPointer<long> address;
-};
+        ReturnType operator()(Arguments... arguments) {
+            ReturnType (*func)(Arguments...) = ((ReturnType(*)(Arguments...)) &address);
+            return func(arguments...);
+        }
+
+        AddressPointer<long> getAddressPointer() {
+            return address;
+        }
+
+    private:
+        AddressPointer<long> address;
+    };
 }
 
 #endif
