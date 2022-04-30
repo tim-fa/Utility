@@ -10,137 +10,151 @@
 
 #undef __try
 
-namespace Internals
-{
-template<typename Type = long>
-class AddressPointer
-{
-	public:
-		AddressPointer() = default;
-		template<typename... Args>
-		explicit AddressPointer(Args... offsets);
-		template<typename... Args>
-		void initialize(Args... offsets);
-		void printPointerPath();
-		operator Type&();
-		AddressPointer<Type>& operator=(Type value);
-		long operator&();
-		Type* operator->();
-		Type* operator[](int index);
+namespace Internals {
+    template<typename Type = long, long TypeSize = 0>
+    class AddressPointer {
+    public:
+        AddressPointer() = default;
 
-		long getAddress();
-		void setValue(Type value);
+        template<typename... Args>
+        explicit AddressPointer(Args... offsets);
 
-	private:
-		void initializePointer();
-		void addOffset(long offset);
-		long currentAddress{0};
-		std::vector<int> offsets;
-};
+        template<typename... Args>
+        void initialize(Args... offsets);
 
-template<typename Type>
-template<typename... Args>
-inline AddressPointer<Type>::AddressPointer(Args... offsets)
-{
-	initialize(offsets...);
-}
+        void printPointerPath();
 
-template<typename Type>
-inline void AddressPointer<Type>::printPointerPath()
-{
-	long curAdr = Internals::getModuleBase();
-	int i = 0;
-	for (auto& offset : offsets) {
-		long pointedValue = *(long*)(curAdr + offset);
-		printf("Level %2d: 0x%010X + 0x%05X [0x%010X] -> 0x%X (Decimal: %d)\n", i++, curAdr, offset, curAdr + offset, pointedValue,
-			pointedValue);
-		curAdr = pointedValue;
-	}
-}
+        explicit operator Type &();
 
-template<typename Type>
-template<typename... Args>
-void AddressPointer<Type>::initialize(Args... offs)
-{
-	for (long offset : {offs...}) {
-		addOffset(offset);
-	}
-}
+        AddressPointer<Type, TypeSize> &operator=(Type value);
 
-template<typename Type>
-inline void AddressPointer<Type>::addOffset(long offset)
-{
-	offsets.push_back(offset);
-}
+        Type operator&=(Type value);
 
-template<typename Type>
-inline AddressPointer<Type>::operator Type&()
-{
-	return *(Type*)getAddress();
-}
+        long operator&();
 
-template<typename Type>
-inline AddressPointer<Type>& AddressPointer<Type>::operator=(Type value)
-{
-	setValue(value);
-	return *this;
-}
+        Type operator->();
 
-template<typename Type>
-inline long AddressPointer<Type>::operator&()
-{
-	return getAddress();
-}
+        Type operator[](int index);
 
-template<typename Type>
-inline Type* AddressPointer<Type>::operator->()
-{
-	return (Type*)getAddress();
-}
+        long getAddress();
 
-template<typename Type>
-inline Type* AddressPointer<Type>::operator[](int index)
-{
-	return (Type*)(getAddress() + sizeof(Type) * index);
-}
+        void setValue(Type value);
 
-template<typename Type>
-long AddressPointer<Type>::getAddress()
-{
-	initializePointer();
-	return currentAddress;
-}
+    private:
+        void initializePointer();
 
-template<typename Type>
-void AddressPointer<Type>::setValue(Type value)
-{
-	initializePointer();
-	*(Type*)currentAddress = value;
-}
+        void addOffset(long offset);
 
-template<typename Type>
-void AddressPointer<Type>::initializePointer()
-{
-	__try {
-		currentAddress = Internals::getModuleBase();
-		bool first = true;
-		for (auto& offset : offsets) {
-			if (!first) {
-				currentAddress = *(long*)currentAddress;
-			}
-			currentAddress = currentAddress + offset;
-			first = false;
-		}
-		*(long*)currentAddress++;
-		*(long*)currentAddress--;
+        long currentAddress{0};
+        std::vector<int> offs;
+    };
 
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER)
-	{
-		currentAddress = 0;
-		throw std::runtime_error("Access violation! Address is not (yet) accessible");
-	}
-}
+    template<typename Type, long TypeSize>
+    template<typename... Args>
+    inline AddressPointer<Type, TypeSize>::AddressPointer(Args... offsets)
+            : offs({offsets...})
+    {
+    }
+
+    template<typename Type, long TypeSize>
+    template<typename... Args>
+    inline void AddressPointer<Type, TypeSize>::initialize(Args... offsets)
+    {
+        for (auto& offset : {offsets...}){
+            offs.push_back(offset);
+        }
+    }
+
+    template<typename Type, long TypeSize>
+    inline void AddressPointer<Type, TypeSize>::printPointerPath() {
+        long curAdr = Internals::getModuleBase();
+        int i = 0;
+        for (auto &offset: offs) {
+            long pointedValue = *(long *) (curAdr + offset);
+            printf("Level %2d: 0x%010X + 0x%05X [0x%010X] -> 0x%X (Decimal: %d)\n", i++, curAdr, offset,
+                   curAdr + offset, pointedValue,
+                   pointedValue);
+            curAdr = pointedValue;
+        }
+    }
+
+    template<typename Type, long TypeSize>
+    inline void AddressPointer<Type, TypeSize>::addOffset(long offset) {
+        offs.push_back(offset);
+    }
+
+    template<typename Type, long TypeSize>
+    inline AddressPointer<Type, TypeSize>::operator Type &() {
+        return *(Type *) getAddress();
+    }
+
+    template<typename Type, long TypeSize>
+    inline AddressPointer<Type, TypeSize> &AddressPointer<Type, TypeSize>::operator=(Type value) {
+        setValue(value);
+        return *this;
+    }
+
+
+    template<typename Type, long TypeSize>
+    inline Type AddressPointer<Type, TypeSize>::operator->() {
+        return (Type) getAddress();
+    }
+
+    template<typename Type, long TypeSize>
+    inline long AddressPointer<Type, TypeSize>::operator&()
+    {
+        return getAddress();
+    }
+
+    template<typename Type, long TypeSize>
+    inline Type AddressPointer<Type, TypeSize>::operator[](int index) {
+        if (!TypeSize){
+            throw std::runtime_error("Type size is 0!");
+        }
+        return (Type) (getAddress() + TypeSize * index);
+    }
+
+    template<typename Type, long TypeSize>
+    long AddressPointer<Type, TypeSize>::getAddress() {
+        initializePointer();
+        return currentAddress;
+    }
+
+    template<typename Type, long TypeSize>
+    void AddressPointer<Type, TypeSize>::setValue(Type value) {
+        initializePointer();
+        *(Type *) currentAddress = value;
+    }
+
+    template<typename Type, long TypeSize>
+    void AddressPointer<Type, TypeSize>::initializePointer() {
+        __try{
+                currentAddress = Internals::getModuleBase();
+                bool first = true;
+                for (auto& offset : offs) {
+                    if (!first) {
+                        currentAddress = *(long *) currentAddress;
+                    }
+                    currentAddress = currentAddress + offset;
+                    first = false;
+                }
+//                *(long*)currentAddress++;
+//                *(long*)currentAddress--;
+
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            currentAddress = 0;
+            throw std::runtime_error("Access violation! Address is not (yet) accessible");
+        }
+    }
+
+    template<typename Type, long TypeSize>
+    Type AddressPointer<Type, TypeSize>::operator&=(Type value) {
+        *(Type *) getAddress() &= value;
+        return *(Type *) getAddress();
+    }
+
 }
 
 #endif
