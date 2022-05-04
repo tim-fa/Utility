@@ -9,9 +9,10 @@ namespace Rendering::Renderables
 {
 enum class RenderObjectType
 {
-		Rectangle,
-		Text,
-		Menu
+	Rectangle = 0x0,
+	BorderedRectangle = 0x1,
+	Text = 0x2,
+	Menu = 0x4
 };
 
 class Renderable

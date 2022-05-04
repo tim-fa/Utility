@@ -16,6 +16,7 @@ struct Text : public Renderable
 {
 	public:
 		Text(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style, const Renderables::Color& color);
+		Text();
 
 		const std::string& getText();
 		const Maths::vec2& getScale();

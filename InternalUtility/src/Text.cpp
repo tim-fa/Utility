@@ -2,7 +2,16 @@
 
 namespace Rendering::Renderables
 {
-Text::Text(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style, const Renderables::Color& color)
+Text::Text()
+	: Renderable(RenderObjectType::Text, Maths::vec2(0, 0), Color(255, 255, 255, 255))
+	, m_scale(Maths::vec2(1, 1))
+	, m_text("")
+	, m_style(FontStyle::Regular)
+{
+}
+
+Text::Text(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style,
+	const Renderables::Color& color)
 	: Renderable(RenderObjectType::Text, position, color)
 	, m_scale(scale)
 	, m_text(text)
