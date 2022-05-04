@@ -17,17 +17,17 @@ class Renderer
 {
 	public:
 		template<class RenderableType>
-		RenderableType* addRenderable(const RenderableType& r)
+		RenderableType* addRenderable(RenderableType& r)
 		{
-			m_renderables.push_back(std::make_shared<RenderableType>(r));
-			return (RenderableType*)m_renderables.back().get();
+			m_renderables.push_back((Renderables::Renderable*)&r);
+			return reinterpret_cast<RenderableType*>(m_renderables.back());
 		}
 
 		template<class RenderableType>
-		RenderableType* operator<<(const RenderableType& r)
+		RenderableType* operator<<(RenderableType& r)
 		{
-			m_renderables.push_back(std::make_shared<RenderableType>(r));
-			return (RenderableType*)m_renderables.back().get();
+			m_renderables.push_back((Renderables::Renderable*)&r);
+			return reinterpret_cast<RenderableType*>(m_renderables.back());
 		}
 
 		void render();
@@ -37,7 +37,7 @@ class Renderer
 		virtual void drawString(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const Renderables::FontStyle& style, const Renderables::Color& color) = 0;
 
 	private:
-		std::vector<std::shared_ptr<Renderables::Renderable>> m_renderables;
+		std::vector<Renderables::Renderable*> m_renderables;
 };
 }
 
