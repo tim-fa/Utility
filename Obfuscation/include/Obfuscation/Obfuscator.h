@@ -49,7 +49,7 @@ public:
         return returnValue;
     }
 
-    __forceinline operator Type() {
+    __forceinline operator Type&() {
         return get();
     }
 
@@ -92,4 +92,5 @@ private:
     std::shared_ptr<int[]> bitMasks;
     std::shared_ptr<short[]> bitStartIndex;
     std::shared_ptr<int[]> data;
+    std::shared_ptr<int[]> keys;
 };
