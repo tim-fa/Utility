@@ -29,6 +29,13 @@ class Renderer
 			m_renderables.push_back((Renderables::Renderable*)&r);
 			return reinterpret_cast<RenderableType*>(m_renderables.back());
 		}
+		template<class RenderableType>
+		void operator<<(std::vector<RenderableType> renderables)
+		{
+			for (auto& renderable : renderables) {
+				m_renderables.push_back((Renderables::Renderable*)&renderable);
+			}
+		}
 
 		void render();
 		void clear();
