@@ -154,7 +154,6 @@ void AddressPointer<Type, TypeSize>::initializePointer()
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		throw std::runtime_error("Access violation! Address is not (yet) accessible");
-		currentAddress = 0;
 	}
 }
 
