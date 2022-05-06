@@ -18,4 +18,9 @@ long getModuleBase()
 {
 	return (long)(size_t)getPeb()->Reserved3[1];
 }
+
+__int64 offsetToModuleAddress(__int64 offset)
+{
+	return getModuleBase() + offset;
+}
 }
