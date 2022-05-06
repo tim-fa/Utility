@@ -50,4 +50,9 @@ void Renderable::setEnabled(bool enabled)
 {
 	m_enabled = enabled;
 }
+
+void Renderable::setColor(const Color& color)
+{
+	m_color = color;
+}
 }

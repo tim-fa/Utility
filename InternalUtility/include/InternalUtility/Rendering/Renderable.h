@@ -25,6 +25,7 @@ class Renderable
 		const RenderObjectType& getType();
 		const bool& getEnabled() const;
 
+		virtual void setColor(const Renderables::Color& color);
 		virtual void setPosition(const Maths::vec2& position);
 		virtual void setXPos(float x);
 		virtual void setYPos(float y);
