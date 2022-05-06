@@ -5,9 +5,9 @@
 
 #include <vector>
 #include "InternalUtility.h"
-#include "AddressPointer.h"
+#include "Variable.h"
 
-namespace Internals {
+namespace Memory {
     template<typename ReturnType, typename... Arguments>
     class FunctionPointer {
     public:
@@ -26,12 +26,12 @@ namespace Internals {
             return func(arguments...);
         }
 
-        AddressPointer<long> getAddressPointer() {
+        Variable<long> getAddressPointer() {
             return address;
         }
 
     private:
-        AddressPointer<long> address;
+        Variable<long> address;
     };
 }
 

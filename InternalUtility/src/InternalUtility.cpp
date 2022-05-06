@@ -1,6 +1,6 @@
 #include "InternalUtility/Memory/InternalUtility.h"
 
-namespace Internals
+namespace Memory
 {
 PEB* getPeb()
 {

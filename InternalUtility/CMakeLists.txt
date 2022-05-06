@@ -14,4 +14,5 @@ target_link_libraries(
 	WindowsWrapper
 	Maths
 	fmt
+	Log
 )

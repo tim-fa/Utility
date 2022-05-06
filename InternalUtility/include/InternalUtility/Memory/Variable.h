@@ -10,16 +10,16 @@
 
 #undef __try
 
-namespace Internals
+namespace Memory
 {
 template<typename Type = long, long TypeSize = 0>
-class AddressPointer
+class Variable
 {
 	public:
-		AddressPointer() = default;
+		Variable() = default;
 
 		template<typename... Args>
-		explicit AddressPointer(Args... offsets);
+		explicit Variable(Args... offsets);
 
 		template<typename... Args>
 		void initialize(Args... offsets);
@@ -28,7 +28,7 @@ class AddressPointer
 
 		operator Type&();
 
-		AddressPointer<Type, TypeSize>& operator=(Type value);
+		Variable<Type, TypeSize>& operator=(Type value);
 
 		Type operator&=(Type value);
 
@@ -53,14 +53,14 @@ class AddressPointer
 
 template<typename Type, long TypeSize>
 template<typename... Args>
-inline AddressPointer<Type, TypeSize>::AddressPointer(Args... offsets)
+inline Variable<Type, TypeSize>::Variable(Args... offsets)
 	: offs({offsets...})
 {
 }
 
 template<typename Type, long TypeSize>
 template<typename... Args>
-inline void AddressPointer<Type, TypeSize>::initialize(Args... offsets)
+inline void Variable<Type, TypeSize>::initialize(Args... offsets)
 {
 	for (auto& offset: {offsets...}) {
 		offs.push_back(offset);
@@ -68,9 +68,9 @@ inline void AddressPointer<Type, TypeSize>::initialize(Args... offsets)
 }
 
 template<typename Type, long TypeSize>
-inline void AddressPointer<Type, TypeSize>::printPointerPath()
+inline void Variable<Type, TypeSize>::printPointerPath()
 {
-	long curAdr = Internals::getModuleBase();
+	long curAdr = Memory::getModuleBase();
 	int i = 0;
 	for (auto& offset: offs) {
 		long pointedValue = *(long*)(curAdr + offset);
@@ -82,38 +82,38 @@ inline void AddressPointer<Type, TypeSize>::printPointerPath()
 }
 
 template<typename Type, long TypeSize>
-inline void AddressPointer<Type, TypeSize>::addOffset(long offset)
+inline void Variable<Type, TypeSize>::addOffset(long offset)
 {
 	offs.push_back(offset);
 }
 
 template<typename Type, long TypeSize>
-inline AddressPointer<Type, TypeSize>::operator Type&()
+inline Variable<Type, TypeSize>::operator Type&()
 {
 	return *(Type*)getAddress();
 }
 
 template<typename Type, long TypeSize>
-inline AddressPointer<Type, TypeSize>& AddressPointer<Type, TypeSize>::operator=(Type value)
+inline Variable<Type, TypeSize>& Variable<Type, TypeSize>::operator=(Type value)
 {
 	setValue(value);
 	return *this;
 }
 
 template<typename Type, long TypeSize>
-inline Type AddressPointer<Type, TypeSize>::operator->()
+inline Type Variable<Type, TypeSize>::operator->()
 {
 	return (Type)getAddress();
 }
 
 template<typename Type, long TypeSize>
-inline Type* AddressPointer<Type, TypeSize>::operator&()
+inline Type* Variable<Type, TypeSize>::operator&()
 {
 	return (Type*)getAddress();
 }
 
 template<typename Type, long TypeSize>
-inline Type AddressPointer<Type, TypeSize>::operator[](int index)
+inline Type Variable<Type, TypeSize>::operator[](int index)
 {
 	if (!TypeSize) {
 		throw std::runtime_error("Type size is 0!");
@@ -122,24 +122,24 @@ inline Type AddressPointer<Type, TypeSize>::operator[](int index)
 }
 
 template<typename Type, long TypeSize>
-long AddressPointer<Type, TypeSize>::getAddress()
+long Variable<Type, TypeSize>::getAddress()
 {
 	initializePointer();
 	return currentAddress;
 }
 
 template<typename Type, long TypeSize>
-void AddressPointer<Type, TypeSize>::setValue(Type value)
+void Variable<Type, TypeSize>::setValue(Type value)
 {
 	initializePointer();
 	*(Type*)currentAddress = value;
 }
 
 template<typename Type, long TypeSize>
-void AddressPointer<Type, TypeSize>::initializePointer()
+void Variable<Type, TypeSize>::initializePointer()
 {
 	__try{
-		currentAddress = Internals::getModuleBase();
+		currentAddress = Memory::getModuleBase();
 		bool first = true;
 		for (auto& offset : offs) {
 			if (!first) {
@@ -158,7 +158,7 @@ void AddressPointer<Type, TypeSize>::initializePointer()
 }
 
 template<typename Type, long TypeSize>
-Type AddressPointer<Type, TypeSize>::operator&=(Type value)
+Type Variable<Type, TypeSize>::operator&=(Type value)
 {
 	*(Type*)getAddress() &= value;
 	return *(Type*)getAddress();

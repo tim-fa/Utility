@@ -1,9 +1,10 @@
 #pragma once
+
 #include <Windows.h>
 #include <winternl.h>
 
-namespace Internals {
-    extern PEB* getPeb();
-    extern long getModuleBase();
-
+namespace Memory
+{
+extern PEB* getPeb();
+extern long getModuleBase();
 }

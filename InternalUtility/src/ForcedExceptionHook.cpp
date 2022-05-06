@@ -1,9 +1,12 @@
 #include <stdexcept>
-#include "ForcedExceptionHook.h"
-#include "Log/Logger.h"
+#include <InternalUtility/Memory/ForcedExceptionHook.h>
+#include <Log/Logger.h>
 
 #define EXCEPTION_VAL 0xFFFFFF00
 #define EXCEPTION_VAL_COUNTER_MASK 0xFF
+
+namespace Hook
+{
 
 LONG WINAPI crashHandler(EXCEPTION_POINTERS* exceptionInfo)
 {
@@ -79,4 +82,5 @@ void ForcedExceptionHook::addHook(uint32_t pointerAddress, uint32_t expectedExce
 		Log::Logger::Debug("Exception Value: 0x{:X}", ctx.exceptionValue);
 		Log::Logger::Debug("Expected Exception Address: 0x{:X}", ctx.expectedExceptionAddress);
 	}
+}
 }
