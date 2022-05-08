@@ -17,24 +17,17 @@ class Renderer
 {
 	public:
 		template<class RenderableType>
-		RenderableType* addRenderable(RenderableType& r)
+		RenderableType* addRenderable(RenderableType* r)
 		{
-			m_renderables.push_back((Renderables::Renderable*)&r);
-			return reinterpret_cast<RenderableType*>(m_renderables.back());
+			m_renderables.push_back(r);
+			return r;
 		}
 
 		template<class RenderableType>
-		RenderableType* operator<<(RenderableType& r)
+		RenderableType* operator<<(RenderableType* r)
 		{
-			m_renderables.push_back((Renderables::Renderable*)&r);
-			return reinterpret_cast<RenderableType*>(m_renderables.back());
-		}
-		template<class RenderableType>
-		void operator<<(std::vector<RenderableType> renderables)
-		{
-			for (auto& renderable : renderables) {
-				m_renderables.push_back((Renderables::Renderable*)&renderable);
-			}
+			m_renderables.push_back(r);
+			return r;
 		}
 
 		void render();
