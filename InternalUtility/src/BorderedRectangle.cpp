@@ -4,8 +4,8 @@ namespace Rendering::Renderables
 {
 
 BorderedRectangle::BorderedRectangle()
-	: Renderable(RenderObjectType::BorderedRectangle, Maths::vec2(0, 0), Color(255, 255, 255, 255))
-	, m_borderColor(Color(255, 255, 255, 255))
+	: Renderable(RenderObjectType::BorderedRectangle, Maths::vec2(0, 0), Color(255, 255, 255, 50))
+	, m_borderColor(Color(255, 0, 0, 255))
 	, m_dimensions(50, 50)
 	, m_borderThickness(1.0f)
 {

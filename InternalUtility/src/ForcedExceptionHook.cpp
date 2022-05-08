@@ -40,37 +40,43 @@ LONG WINAPI crashHandler(EXCEPTION_POINTERS* exceptionInfo)
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Esi = ctx.restoreValue;			fixed = true;
+			exceptionInfo->ContextRecord->Esi = ctx.restoreValue;
+			fixed = true;
 		}
 		if (exceptionInfo->ContextRecord->Eax == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Eax = ctx.restoreValue;			fixed = true;
+			exceptionInfo->ContextRecord->Eax = ctx.restoreValue;
+			fixed = true;
 		}
 		if (exceptionInfo->ContextRecord->Edx == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Edx = ctx.restoreValue;			fixed = true;
+			exceptionInfo->ContextRecord->Edx = ctx.restoreValue;
+			fixed = true;
 		}
 		if (exceptionInfo->ContextRecord->Ecx == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Ecx = ctx.restoreValue;			fixed = true;
+			exceptionInfo->ContextRecord->Ecx = ctx.restoreValue;
+			fixed = true;
 		}
 		if (exceptionInfo->ContextRecord->Edi == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Edi = ctx.restoreValue;			fixed = true;
+			exceptionInfo->ContextRecord->Edi = ctx.restoreValue;
+			fixed = true;
 		}
 		if (exceptionInfo->ContextRecord->Esp == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Esp = ctx.restoreValue;			fixed = true;
+			exceptionInfo->ContextRecord->Esp = ctx.restoreValue;
+			fixed = true;
 		}
 		if (exceptionInfo->ContextRecord->Eip == ctx.expectedExceptionAddress) {
 			ctx.callback(exceptionInfo);
