@@ -34,9 +34,9 @@ class Variable
 
 		Type* operator&();
 
-		Type operator->();
+		Type* operator->();
 
-		Type operator[](int index);
+		Type& operator[](int index);
 
 		long getAddress();
 
@@ -101,9 +101,9 @@ inline Variable<Type, TypeSize>& Variable<Type, TypeSize>::operator=(Type value)
 }
 
 template<typename Type, long TypeSize>
-inline Type Variable<Type, TypeSize>::operator->()
+inline Type* Variable<Type, TypeSize>::operator->()
 {
-	return (Type)getAddress();
+	return (Type*)getAddress();
 }
 
 template<typename Type, long TypeSize>
@@ -113,12 +113,12 @@ inline Type* Variable<Type, TypeSize>::operator&()
 }
 
 template<typename Type, long TypeSize>
-inline Type Variable<Type, TypeSize>::operator[](int index)
+inline Type& Variable<Type, TypeSize>::operator[](int index)
 {
 	if (!TypeSize) {
 		throw std::runtime_error("Type size is 0!");
 	}
-	return (Type)(getAddress() + TypeSize * index);
+	return *(Type*)(getAddress() + TypeSize * index);
 }
 
 template<typename Type, long TypeSize>
