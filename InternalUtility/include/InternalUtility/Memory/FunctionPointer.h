@@ -26,12 +26,12 @@ namespace Memory {
             return func(arguments...);
         }
 
-        Variable<long> getAddressPointer() {
+        Variable<uint64_t> getAddressPointer() {
             return address;
         }
 
     private:
-        Variable<long> address;
+        Variable<uint64_t> address;
     };
 }
 

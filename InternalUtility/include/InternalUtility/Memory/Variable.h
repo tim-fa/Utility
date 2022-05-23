@@ -7,8 +7,11 @@
 #include <stdexcept>
 #include <exception>
 #include "InternalUtility.h"
+#include "Log/Logger.h"
 
 #undef __try
+
+#define DebugPrintPointerPath(var) Log::Logger::Debug("{}:", #var); var.printPointerPath()
 
 namespace Memory
 {
@@ -38,7 +41,7 @@ class Variable
 
 		Type& operator[](int index);
 
-		long getAddress();
+		uint64_t getAddress();
 
 		void setValue(Type value);
 
@@ -47,7 +50,7 @@ class Variable
 
 		void addOffset(long offset);
 
-		long currentAddress{0};
+		uint64_t currentAddress{0};
 		std::vector<int> offs;
 };
 
@@ -70,13 +73,12 @@ inline void Variable<Type, TypeSize>::initialize(Args... offsets)
 template<typename Type, long TypeSize>
 inline void Variable<Type, TypeSize>::printPointerPath()
 {
-	long curAdr = Memory::getModuleBase();
+	uint64_t curAdr = Memory::getModuleBase();
 	int i = 0;
 	for (auto& offset: offs) {
-		long pointedValue = *(long*)(curAdr + offset);
-		printf("Level %2d: 0x%010X + 0x%05X [0x%010X] -> 0x%X (Decimal: %d)\n", i++, curAdr, offset,
-			curAdr + offset, pointedValue,
-			pointedValue);
+		uint64_t pointedValue = *(uint64_t*)(curAdr + offset);
+		Log::Logger::d("Level {:2d}: 0x{:010X} + 0x{:06X} [0x{:010X}] -> 0x{:X} (Decimal: {:d})\n", i++, curAdr, offset,
+			curAdr + offset, pointedValue, pointedValue);
 		curAdr = pointedValue;
 	}
 }
@@ -122,7 +124,7 @@ inline Type& Variable<Type, TypeSize>::operator[](int index)
 }
 
 template<typename Type, long TypeSize>
-long Variable<Type, TypeSize>::getAddress()
+uint64_t  Variable<Type, TypeSize>::getAddress()
 {
 	initializePointer();
 	return currentAddress;
@@ -143,13 +145,13 @@ void Variable<Type, TypeSize>::initializePointer()
 		bool first = true;
 		for (auto& offset : offs) {
 			if (!first) {
-				currentAddress = *(long*)currentAddress;
+				currentAddress = *(uint64_t *)currentAddress;
 			}
 			currentAddress = currentAddress + offset;
 			first = false;
 		}
-		*(long*)currentAddress++;
-		*(long*)currentAddress--;
+		*(uint64_t *)currentAddress++;
+		*(uint64_t *)currentAddress--;
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
