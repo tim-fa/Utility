@@ -5,20 +5,40 @@
 #define EXCEPTION_VAL 0xFFFFFF00
 #define EXCEPTION_VAL_COUNTER_MASK 0xFF
 
+#ifdef AAA
+#define EAX Eax
+#define EDX Edx
+#define ECX Ecx
+#define ESP Esp
+#define ESI Esi
+#define EIP Eip
+#define EBP Ebp
+#define EDI Edi
+#else
+#define EAX Rax
+#define EDX Rdx
+#define ECX Rcx
+#define ESP Rsp
+#define ESI Rsi
+#define EIP Rip
+#define EBP Rbp
+#define EDI Rdi
+#endif
+
 namespace Hook
 {
 
 void printRegisters(EXCEPTION_POINTERS* exceptionInfo)
 {
 	Log::Logger::Error("Code: 0x{:X}", exceptionInfo->ExceptionRecord->ExceptionCode);
-	Log::Logger::Info("EIP: 0x{:X}", exceptionInfo->ContextRecord->Eip);
-	Log::Logger::Warning("EBP: 0x{:X}", exceptionInfo->ContextRecord->Ebp);
-	Log::Logger::Warning("ESI: 0x{:X}", exceptionInfo->ContextRecord->Esi);
-	Log::Logger::Warning("EAX: 0x{:X}", exceptionInfo->ContextRecord->Eax);
-	Log::Logger::Warning("EDX: 0x{:X}", exceptionInfo->ContextRecord->Edx);
-	Log::Logger::Warning("ECX: 0x{:X}", exceptionInfo->ContextRecord->Ecx);
-	Log::Logger::Warning("EDI: 0x{:X}", exceptionInfo->ContextRecord->Edi);
-	Log::Logger::Warning("ESP: 0x{:X}", exceptionInfo->ContextRecord->Esp);
+	Log::Logger::Info("EIP: 0x{:X}", exceptionInfo->ContextRecord->EIP);
+	Log::Logger::Warning("EBP: 0x{:X}", exceptionInfo->ContextRecord->EBP);
+	Log::Logger::Warning("ESI: 0x{:X}", exceptionInfo->ContextRecord->ESI);
+	Log::Logger::Warning("EAX: 0x{:X}", exceptionInfo->ContextRecord->EAX);
+	Log::Logger::Warning("EDX: 0x{:X}", exceptionInfo->ContextRecord->EDX);
+	Log::Logger::Warning("ECX: 0x{:X}", exceptionInfo->ContextRecord->ECX);
+	Log::Logger::Warning("EDI: 0x{:X}", exceptionInfo->ContextRecord->EDI);
+	Log::Logger::Warning("ESP: 0x{:X}", exceptionInfo->ContextRecord->ESP);
 }
 
 LONG WINAPI crashHandler(EXCEPTION_POINTERS* exceptionInfo)
@@ -26,59 +46,60 @@ LONG WINAPI crashHandler(EXCEPTION_POINTERS* exceptionInfo)
 	if (exceptionInfo->ExceptionRecord->ExceptionCode != EXCEPTION_ACCESS_VIOLATION) {
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
-
+	printRegisters(exceptionInfo);
+	getchar();
 	bool fixed = false;
 	for (auto& ctx: ForcedExceptionHook::hookContexts) {
-		if (exceptionInfo->ContextRecord->Ebp == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->EBP == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Ebp = ctx.restoreValue;
+			exceptionInfo->ContextRecord->EBP = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Esi == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->ESI == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Esi = ctx.restoreValue;
+			exceptionInfo->ContextRecord->ESI = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Eax == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->EAX == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Eax = ctx.restoreValue;
+			exceptionInfo->ContextRecord->EAX = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Edx == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->EDX == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Edx = ctx.restoreValue;
+			exceptionInfo->ContextRecord->EDX = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Ecx == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->ECX == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Ecx = ctx.restoreValue;
+			exceptionInfo->ContextRecord->ECX = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Edi == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->EDI == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Edi = ctx.restoreValue;
+			exceptionInfo->ContextRecord->EDI = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Esp == ctx.exceptionValue) {
+		if (exceptionInfo->ContextRecord->ESP == ctx.exceptionValue) {
 			if (ctx.debugOutput) {
 				printRegisters(exceptionInfo);
 			}
-			exceptionInfo->ContextRecord->Esp = ctx.restoreValue;
+			exceptionInfo->ContextRecord->ESP = ctx.restoreValue;
 			fixed = true;
 		}
-		if (exceptionInfo->ContextRecord->Eip == ctx.expectedExceptionAddress) {
+		if (exceptionInfo->ContextRecord->EIP == ctx.expectedExceptionAddress) {
 			ctx.callback(exceptionInfo);
 		}
 	}
