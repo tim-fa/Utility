@@ -6,6 +6,6 @@
 namespace Memory
 {
 extern PEB* getPeb();
-extern long getModuleBase();
-extern __int64 offsetToModuleAddress(__int64 offset);
+extern uint64_t getModuleBase();
+extern uint64_t offsetToModuleAddress(uint64_t offset);
 }
