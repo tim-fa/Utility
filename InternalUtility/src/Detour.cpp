@@ -39,13 +39,38 @@ void* findCodeCave(void* startAdr, int len)
 	return codeCave;
 }
 
+void fixRelativeOffset(void* originalAddress, void* newAddress, int numberOfBytes)
+{
+	byte* currentByte = (byte*)newAddress;
+	Log::Logger::Debug("Relative Address at 0x{:X}", (uint64_t)newAddress);
+	int oldRelativeOffset = 0;
+	// get original relative offset
+	for (int idx = 0; idx < numberOfBytes; idx++) {
+		oldRelativeOffset |= (currentByte[idx] & 0xFF) << (idx * 8);
+	}
+	uint64_t oldAbsoluteAddress = (uint64_t)originalAddress + numberOfBytes + oldRelativeOffset;
+	Log::Logger::Debug("Relative function offset 0x{:X} points to 0x{:X}", oldRelativeOffset, oldAbsoluteAddress);
+
+	int newRelativeCalOffs = oldAbsoluteAddress - ((uint64_t)currentByte + numberOfBytes);
+	uint64_t newAbsoluteCallAdr = (uint64_t)currentByte + numberOfBytes + newRelativeCalOffs;
+	Log::Logger::Debug("Relative function offset from instruction in trampoline mem 0x{:X} points to 0x{:X}", newRelativeCalOffs, newAbsoluteCallAdr);
+	if (oldAbsoluteAddress != newAbsoluteCallAdr) {
+		Log::Logger::Error("Cannot fix relative jump address! Relative offset points to wrong address. (Relative offset > 32 bit?)");
+		return;
+	}
+	// write new relative offset
+	for (int idx = 0; idx < numberOfBytes; idx++) {
+		currentByte[idx] = (newRelativeCalOffs  >> (idx * 8)) & 0xFF;
+	}
+}
+
 void* Tramp64(void* src, void* dst, int len)
 {
 	Log::Logger::Info("Installing Hook at 0x{:X}", (uint64_t)src);
 	int MinLen = 14;
 
 	if (len < MinLen) {
-		return NULL;
+		return nullptr;
 	}
 
 	BYTE stub[] = {
@@ -55,10 +80,10 @@ void* Tramp64(void* src, void* dst, int len)
 
 	//void* pTrampoline = VirtualAlloc(0, len + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
-	void* pTrampoline = findCodeCave(src, len + sizeof(stub) + 1);
+	void* pTrampoline = findCodeCave(src, len + sizeof(stub));
 	Log::Logger::Debug("Trampoline memory: 0x{:X}", (uint64_t)pTrampoline);
 	DWORD tmp;
-	VirtualProtect(pTrampoline, len + sizeof(stub) + 1, PAGE_EXECUTE_READWRITE, &tmp);
+	VirtualProtect(pTrampoline, len + sizeof(stub), PAGE_EXECUTE_READWRITE, &tmp);
 
 	ULONG dwOld = 0;
 	VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &dwOld);
@@ -76,75 +101,19 @@ void* Tramp64(void* src, void* dst, int len)
 	for (int i = 0; i < len; i++) {
 		BYTE* currentByte = (BYTE*)((uintptr_t)pTrampoline + i);
 		if (*currentByte == 0xE8) { // call instruction
-			Log::Logger::Debug("CALL instruction at trampoline off: {:X}", i);
-			int callOffset = 0;
-			// get original relative offset
-			for (int idx = 0; idx < 4; idx++) {
-				callOffset |= (currentByte[idx + 1] & 0xFF) << (idx * 8);
-			}
-			uint64_t absoluteCallAdr = (uint64_t)src + i + 5 + callOffset;
-			Log::Logger::Debug("Relative function offset from original: 0x{:X} -> Will call 0x{:X}", callOffset, absoluteCallAdr);
-
-			int newRelCalOffs = absoluteCallAdr - ((uint64_t)currentByte + 5);
-			uint64_t newAbsoluteCallAdr = (uint64_t)currentByte + 5 + newRelCalOffs;
-			Log::Logger::Debug("Relative function offset from instruction in trampoline mem: 0x{:X} -> Will call 0x{:X}", newRelCalOffs, newAbsoluteCallAdr);
-			if (newAbsoluteCallAdr != absoluteCallAdr) {
-				Log::Logger::Error("Cannot fix relative jump address! Relative offset points to wrong address. (Relative offset > 32 bit?)");
-				return 0;
-			}
-			// write new relative offset
-			currentByte[1] = newRelCalOffs & 0xFF;
-			currentByte[2] = (newRelCalOffs >> 8) & 0xFF;
-			currentByte[3] = (newRelCalOffs >> 16) & 0xFF;
-			currentByte[4] = (newRelCalOffs >> 24) & 0xFF;
+			fixRelativeOffset((void*)((uintptr_t)src + i + 1), &currentByte[1], 4);
 			i += 4;
 		}
 		if (*currentByte == 0xFF && currentByte[1] == 0x05) { // inc with relative offset
-			Log::Logger::Debug("INC instruction at trampoline off: {:X}", i);
-			int incOffset = 0;
-			// get original relative offset
-			for (int idx = 0; idx < 4; idx++) {
-				incOffset |= (currentByte[idx + 2] & 0xFF) << (idx * 8);
-			}
-			uint64_t absoluteIncAdr = (uint64_t)src + i + 6 + incOffset;
-			Log::Logger::Debug("Relative function offset from original: 0x{:X} -> Will call 0x{:X}", incOffset, absoluteIncAdr);
-
-			int newRelIncOffs = absoluteIncAdr - ((uint64_t)currentByte + 6);
-			uint64_t newAbsoluteCallAdr = (uint64_t)currentByte + 6 + newRelIncOffs;
-			Log::Logger::Debug("Relative function offset from instruction in trampoline mem: 0x{:X} -> Will INC 0x{:X}", newRelIncOffs, newAbsoluteCallAdr);
-			if (newAbsoluteCallAdr != absoluteIncAdr) {
-				Log::Logger::Error("Cannot fix relative jump address! Relative offset points to wrong address. (Relative offset > 32 bit?)");
-				return 0;
-			}
-			// write new relative offset
-			currentByte[2] = absoluteIncAdr & 0xFF;
-			currentByte[3] = (absoluteIncAdr >> 8) & 0xFF;
-			currentByte[4] = (absoluteIncAdr >> 16) & 0xFF;
-			currentByte[5] = (absoluteIncAdr >> 24) & 0xFF;
+			fixRelativeOffset((void*)((uintptr_t)src + i + 2), &currentByte[2], 4);
 			i += 5;
 		}
 		if (*currentByte == 0x89 && currentByte[1] == 0x05) { // mov with relative offset in dest
-			Log::Logger::Debug("MOV instruction at trampoline off: {:X}", i);
-			int incOffset = 0;
-			// get original relative offset
-			for (int idx = 0; idx < 4; idx++) {
-				incOffset |= (currentByte[idx + 2] & 0xFF) << (idx * 8);
-			}
-			uint64_t absoluteIncAdr = (uint64_t)src + i + 6 + incOffset;
-			Log::Logger::Debug("Relative function offset from original: 0x{:X} -> Will MOV 0x{:X}", incOffset, absoluteIncAdr);
-
-			int newRelIncOffs = absoluteIncAdr - ((uint64_t)currentByte + 6);
-			uint64_t newAbsoluteCallAdr = (uint64_t)currentByte + 6 + newRelIncOffs;
-			Log::Logger::Debug("Relative function offset from instruction in trampoline mem: 0x{:X} -> Will call 0x{:X}", newRelIncOffs, newAbsoluteCallAdr);
-			if (newAbsoluteCallAdr != absoluteIncAdr) {
-				Log::Logger::Error("Cannot fix relative jump address! Relative offset points to wrong address. (Relative offset > 32 bit?)");
-				return 0;
-			}
-			// write new relative offset
-			currentByte[2] = absoluteIncAdr & 0xFF;
-			currentByte[3] = (absoluteIncAdr >> 8) & 0xFF;
-			currentByte[4] = (absoluteIncAdr >> 16) & 0xFF;
-			currentByte[5] = (absoluteIncAdr >> 24) & 0xFF;
+			fixRelativeOffset((void*)((uintptr_t)src + i + 2), &currentByte[2], 4);
+			i += 5;
+		}
+		if (*currentByte == 0x0F && currentByte[1] == 0x85) { // jnz near rel
+			fixRelativeOffset((void*)((uintptr_t)src + i + 2), &currentByte[2], 4);
 			i += 5;
 		}
 	}
