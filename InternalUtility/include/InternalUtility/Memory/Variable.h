@@ -117,46 +117,47 @@ inline Type* Variable<Type, TypeSize>::operator&()
 template<typename Type, long TypeSize>
 inline Type& Variable<Type, TypeSize>::operator[](int index)
 {
+	int size = 0;
 	if (!TypeSize) {
-		throw std::runtime_error("Type size is 0!");
+		size = sizeof(Type);
 	}
-	return *(Type*)(getAddress() + TypeSize * index);
+	return *(Type*)(getAddress() + size * index);
 }
 
 template<typename Type, long TypeSize>
-uint64_t  Variable<Type, TypeSize>::getAddress()
+uint64_t Variable<Type, TypeSize>::getAddress()
 {
-	initializePointer();
+	__try
+	{
+		initializePointer();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		throw std::runtime_error("Variable::getAddress(): Access violation");
+	}
 	return currentAddress;
 }
 
 template<typename Type, long TypeSize>
 void Variable<Type, TypeSize>::setValue(Type value)
 {
-	initializePointer();
-	*(Type*)currentAddress = value;
+	*(Type*)getAddress() = value;
 }
 
 template<typename Type, long TypeSize>
 void Variable<Type, TypeSize>::initializePointer()
 {
-	__try{
-		currentAddress = Memory::getModuleBase();
-		bool first = true;
-		for (auto& offset : offs) {
-			if (!first) {
-				currentAddress = *(uint64_t *)currentAddress;
-			}
-			currentAddress = currentAddress + offset;
-			first = false;
+	currentAddress = Memory::getModuleBase();
+	bool first = true;
+	for (auto& offset: offs) {
+		if (!first) {
+			currentAddress = *(uint64_t*)currentAddress;
 		}
-		*(uint64_t *)currentAddress++;
-		*(uint64_t *)currentAddress--;
+		currentAddress = currentAddress + offset;
+		first = false;
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER)
-	{
-		throw std::runtime_error("Access violation! Address is not (yet) accessible");
-	}
+	*(uint64_t*)currentAddress++;
+	*(uint64_t*)currentAddress--;
 }
 
 template<typename Type, long TypeSize>
