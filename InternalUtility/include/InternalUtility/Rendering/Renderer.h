@@ -16,18 +16,14 @@ namespace Rendering
 class Renderer
 {
 	public:
-		template<class RenderableType>
-		RenderableType* addRenderable(RenderableType* r)
+		void addRenderable(Renderables::Renderable* r)
 		{
 			m_renderables.push_back(r);
-			return r;
 		}
 
-		template<class RenderableType>
-		RenderableType* operator<<(RenderableType* r)
+		void operator<<(Renderables::Renderable* r)
 		{
 			m_renderables.push_back(r);
-			return r;
 		}
 
 		void render();
