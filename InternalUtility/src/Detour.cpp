@@ -24,9 +24,9 @@ int DetourHook::relativeJumpPresent(void* address)
 {
 	byte* currentByte = (byte*)address;
 	for (auto& relativeInstruction: m_relativeInstructions) {
-		bool isRelative = false;
+		bool isRelative = true;
 		for (int i = 0; i < relativeInstruction.length; i++) {
-			isRelative |= currentByte[i] == relativeInstruction.instructionBytes[i];
+			isRelative &= currentByte[i] == relativeInstruction.instructionBytes[i];
 		}
 		if (isRelative) {
 			Log::Logger::Info("Found {:s} instruction with relative address", relativeInstruction.name);
@@ -103,7 +103,6 @@ void* DetourHook::trampoline64(void* src, void* dst, int len)
 			auto origRelAdrLocation = (void*)((uintptr_t)src + i + relativeJumpInstructionLength);
 			auto trampRelAdrLocation = (void*)&currentByte[relativeJumpInstructionLength];
 			fixRelativeOffset(origRelAdrLocation, trampRelAdrLocation, 4);
-			i += 4 + relativeJumpInstructionLength;
 		}
 	}
 
@@ -125,11 +124,15 @@ DetourHook::DetourHook()
 	byte callBytes[] = {0xE8};
 	byte incBytes[] ={0xFF, 0x05};
 	byte movBytes[] = {0xFF, 0x05};
+	byte movBytes2[] = {0x48, 0x8b, 0x05};
 	byte jnzBytes[] = {0x0F, 0x85};
+	byte leaBytes[] = {0x48, 0x8D, 0x05};
 	addRelativeInstruction("CALL", callBytes, 1);
 	addRelativeInstruction("INC", incBytes, 2);
 	addRelativeInstruction("MOV", movBytes, 2);
+	addRelativeInstruction("MOV", movBytes2, 3);
 	addRelativeInstruction("JNZ", jnzBytes, 2);
+	addRelativeInstruction("LEA", leaBytes, 3);
 }
 
 void* DetourHook::findCodeCave(void* startAdr, int len)
