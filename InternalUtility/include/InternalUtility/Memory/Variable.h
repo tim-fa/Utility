@@ -117,7 +117,7 @@ inline Type* Variable<Type, TypeSize>::operator&()
 template<typename Type, long TypeSize>
 inline Type& Variable<Type, TypeSize>::operator[](int index)
 {
-	int size = 0;
+	int size = TypeSize;
 	if (!TypeSize) {
 		size = sizeof(Type);
 	}
