@@ -225,7 +225,7 @@ void Menu::render(const Rendering::Renderer& renderer)
 		for (auto& item: submenu->getItems()) {
 			renderer.drawString(
 				Maths::vec2(submenu->m_position.x, submenu->m_position.y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
-				Maths::vec2(.7),
+				Maths::vec2(.2),
 				item->getName(),
 				Rendering::FontStyle::Regular,
 				item->getFontColor());
@@ -240,7 +240,7 @@ void Menu::render(const Rendering::Renderer& renderer)
 			renderer.drawString(
 				Maths::vec2(submenu->m_position.x + submenu->getItemDimensions().x - 70,
 					submenu->m_position.y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
-				Maths::vec2(.7),
+				Maths::vec2(.2),
 				itemOption,
 				Rendering::FontStyle::Regular,
 				item->getFontColor());
