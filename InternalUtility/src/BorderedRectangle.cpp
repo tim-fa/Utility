@@ -5,9 +5,9 @@ namespace Rendering::Renderables
 
 BorderedRectangle::BorderedRectangle()
 	: Renderable(RenderObjectType::BorderedRectangle, Maths::vec2(0, 0), Colors::Transparent)
-	, m_borderColor(Colors::Black)
+	, m_borderColor(Colors::White)
 	, m_dimensions(50, 50)
-	, m_borderThickness(1.0f)
+	, m_borderThickness(1.5f)
 {
 }
 
