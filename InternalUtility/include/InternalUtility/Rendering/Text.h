@@ -4,30 +4,34 @@
 #include <fmt/format.h>
 #include "Renderable.h"
 
-namespace Rendering::Renderables
+namespace Rendering
 {
-
-enum class FontStyle{
-		Regular,
-		Bold
+enum class FontStyle
+{
+	Regular,
+	Bold
 };
+
+namespace Renderables
+{
 
 struct Text : public Renderable
 {
 	public:
-		Text(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style, const Renderables::Color& color);
+		Text(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style, const Color& color);
 		Text();
 
 		const std::string& getText();
 		const Maths::vec2& getScale();
 		const FontStyle& getStyle();
 
-        template<class ... Args>
-		void setText(const std::string& text, Args ... args) {
-            m_text = fmt::format(text, args...);
-        }
+		template<class ... Args>
+		void setText(const std::string& text, Args ... args)
+		{
+			m_text = fmt::format(text, args...);
+		}
 
-    void setScale(const Maths::vec2& scale);
+		void setScale(const Maths::vec2& scale);
 		void setStyle(const FontStyle& style);
 
 	private:
@@ -36,5 +40,5 @@ struct Text : public Renderable
 		FontStyle m_style;
 };
 }
-
+}
 

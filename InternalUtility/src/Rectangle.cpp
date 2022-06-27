@@ -4,11 +4,11 @@ namespace Rendering::Renderables
 {
 
 Rectangle::Rectangle()
-	: Renderable(RenderObjectType::Rectangle, Maths::vec2(0, 0), Color(255, 255, 255, 255))
+	: Renderable(RenderObjectType::Rectangle, Maths::vec2(0, 0), Rendering::Colors::White)
 {
 }
 
-Rectangle::Rectangle(Maths::vec2 position, Maths::vec2 dimensions, const Renderables::Color& color)
+Rectangle::Rectangle(Maths::vec2 position, Maths::vec2 dimensions, const Color& color)
 	: Renderable(RenderObjectType::Rectangle, position, color)
 	, m_dimensions(dimensions)
 {

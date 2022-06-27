@@ -7,7 +7,7 @@ namespace Rendering::Renderables
 struct BorderedRectangle : public Renderable
 {
 	public:
-		BorderedRectangle(Maths::vec2 position, Maths::vec2 dimensions, const Renderables::Color& backgroundColor, const Renderables::Color& borderColor);
+		BorderedRectangle(Maths::vec2 position, Maths::vec2 dimensions, const Color& backgroundColor, const Color& borderColor);
 		BorderedRectangle();
 
 		const Maths::vec2& getDimensions();

@@ -3,15 +3,15 @@
 namespace Rendering::Renderables
 {
 Text::Text()
-	: Renderable(RenderObjectType::Text, Maths::vec2(0, 0), Color(255, 255, 255, 255))
+	: Renderable(RenderObjectType::Text, Maths::vec2(100, 500), Rendering::Colors::White)
 	, m_scale(Maths::vec2(1, 1))
-	, m_text("")
+	, m_text("n/a")
 	, m_style(FontStyle::Regular)
 {
 }
 
 Text::Text(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style,
-	const Renderables::Color& color)
+	const Color& color)
 	: Renderable(RenderObjectType::Text, position, color)
 	, m_scale(scale)
 	, m_text(text)

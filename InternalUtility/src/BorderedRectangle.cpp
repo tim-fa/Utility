@@ -4,14 +4,14 @@ namespace Rendering::Renderables
 {
 
 BorderedRectangle::BorderedRectangle()
-	: Renderable(RenderObjectType::BorderedRectangle, Maths::vec2(0, 0), Color(255, 255, 255, 50))
-	, m_borderColor(Color(255, 0, 0, 255))
+	: Renderable(RenderObjectType::BorderedRectangle, Maths::vec2(0, 0), Colors::Transparent)
+	, m_borderColor(Colors::Black)
 	, m_dimensions(50, 50)
 	, m_borderThickness(1.0f)
 {
 }
 
-BorderedRectangle::BorderedRectangle(Maths::vec2 position, Maths::vec2 dimensions, const Renderables::Color& backgroundColor, const Renderables::Color& borderColor)
+BorderedRectangle::BorderedRectangle(Maths::vec2 position, Maths::vec2 dimensions, const Color& backgroundColor, const Color& borderColor)
 	: Renderable(RenderObjectType::BorderedRectangle, position, backgroundColor)
 	, m_borderColor(borderColor)
 	, m_dimensions(dimensions)
