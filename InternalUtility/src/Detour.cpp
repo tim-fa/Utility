@@ -2,7 +2,7 @@
 #include "WindowsWrapper/NtWrapper.h"
 #include "Log/Logger.h"
 
-namespace Hook
+namespace Memory
 {
 void* detour(unsigned char* src, const unsigned char* dst, const int len)
 {
