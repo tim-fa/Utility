@@ -23,4 +23,15 @@ uint64_t offsetToModuleAddress(uint64_t offset)
 {
 	return getModuleBase() + offset;
 }
+MODULEINFO getModuleInfo(const char* moduleName)
+{
+	MODULEINFO modInfo = {nullptr};
+	HMODULE hModule = GetModuleHandleA(moduleName);
+	if (hModule == 0) {
+		return modInfo;
+	}
+	GetModuleInformation(GetCurrentProcess(), hModule, &modInfo, sizeof(MODULEINFO));
+	return modInfo;
+}
+
 }
