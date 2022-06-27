@@ -1,13 +1,10 @@
 #pragma once
-
-#ifndef ADDRESS_PTR_H
-#define ADDRESS_PTR_H
-
 #include <vector>
 #include <stdexcept>
 #include <exception>
 #include "InternalUtility.h"
 #include "Log/Logger.h"
+#include "PatternScanner.h"
 
 #undef __try
 
@@ -25,7 +22,8 @@ class Variable
 		explicit Variable(Args... offsets);
 
 		template<typename... Args>
-		void initialize(Args... offsets);
+		void initializeByOffsets(Args... offsets);
+		void initializeByPattern(const std::string& pattern);
 
 		void printPointerPath();
 
@@ -63,11 +61,13 @@ inline Variable<Type, TypeSize>::Variable(Args... offsets)
 
 template<typename Type, long TypeSize>
 template<typename... Args>
-inline void Variable<Type, TypeSize>::initialize(Args... offsets)
+inline void Variable<Type, TypeSize>::initializeByOffsets(Args... offsets)
 {
+	offs.clear();
 	for (auto& offset: {offsets...}) {
 		offs.push_back(offset);
 	}
+	printf("lkj %X\n", offs.back());
 }
 
 template<typename Type, long TypeSize>
@@ -166,6 +166,10 @@ Type Variable<Type, TypeSize>::operator&=(Type value)
 	*(Type*)getAddress() &= value;
 	return *(Type*)getAddress();
 }
-}
 
-#endif
+template<typename Type, long TypeSize>
+inline void Variable<Type, TypeSize>::initializeByPattern(const std::string& pattern)
+{
+	initializeByOffsets(Memory::findPlaceholderAddress(pattern) - Memory::getModuleBase());
+}
+}
