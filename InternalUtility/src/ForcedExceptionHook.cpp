@@ -25,7 +25,7 @@
 #define EDI Rdi
 #endif
 
-namespace Hook
+namespace Memory
 {
 
 void printRegisters(EXCEPTION_POINTERS* exceptionInfo)

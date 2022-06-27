@@ -4,7 +4,7 @@
 #include <vector>
 #include <Windows.h>
 
-namespace Hook
+namespace Memory
 {
 
 typedef std::function<void(EXCEPTION_POINTERS*)> FEHookCallback;
