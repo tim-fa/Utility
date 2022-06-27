@@ -9,7 +9,6 @@
 #include "Rectangle.h"
 #include "Text.h"
 #include "Color.h"
-#include "Menu.h"
 
 namespace Rendering
 {
@@ -29,8 +28,8 @@ class Renderer
 		void render();
 		void clear();
 
-		virtual void drawRect(Maths::vec2 position, Maths::vec2 dimensions, const Renderables::Color& color) = 0;
-		virtual void drawString(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const Renderables::FontStyle& style, const Renderables::Color& color) = 0;
+		virtual void drawRect(Maths::vec2 position, Maths::vec2 dimensions, const Color& color) const = 0;
+		virtual void drawString(Maths::vec2 position, Maths::vec2 scale, const std::string& text, const FontStyle& style, const Color& color) const = 0;
 
 	private:
 		std::vector<Renderables::Renderable*> m_renderables;

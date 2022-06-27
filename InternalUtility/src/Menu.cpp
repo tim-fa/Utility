@@ -3,10 +3,9 @@
 #include <fmt/format.h>
 #include <Windows.h>
 
-namespace Rendering::Renderables
+namespace Utility
 {
-
-MenuItem::MenuItem(const std::string& name, const Maths::vec2& itemDimensions, const Color& fontColor, const Color& selectionColor)
+MenuItem::MenuItem(const std::string& name, const Maths::vec2& itemDimensions, const Rendering::Color& fontColor, const Rendering::Color& selectionColor)
 	: m_name(name)
 	, m_itemDimensions(itemDimensions)
 	, m_fontColor(fontColor)
@@ -19,12 +18,12 @@ const Maths::vec2& MenuItem::getItemDimensions()
 	return m_itemDimensions;
 }
 
-const Color& MenuItem::getFontColor()
+const Rendering::Color& MenuItem::getFontColor()
 {
 	return m_fontColor;
 }
 
-void MenuItem::setFontColor(const Color& color)
+void MenuItem::setFontColor(const Rendering::Color& color)
 {
 	m_fontColor = color;
 }
@@ -39,12 +38,12 @@ void MenuItem::setName(const std::string& name)
 	m_name = name;
 }
 
-const Color& MenuItem::getSelectionColor()
+const Rendering::Color& MenuItem::getSelectionColor()
 {
 	return m_selectionColor;
 }
 
-void MenuItem::setSelectionColor(const Color& color)
+void MenuItem::setSelectionColor(const Rendering::Color& color)
 {
 	m_selectionColor = color;
 }
@@ -65,11 +64,12 @@ Setting* MenuItem::asSetting()
 	return (Setting*)this;
 }
 
-Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Color& color, const Color& fontColor,
-	const Color& selectionColor)
-	: Renderable(RenderObjectType::Menu, position, color)
-	, MenuItem(name, itemDimensions, fontColor, selectionColor)
+Menu::Menu(const std::string& name, const Maths::vec2& position, const Maths::vec2& itemDimensions, const Rendering::Color& color,
+	const Rendering::Color& fontColor, const Rendering::Color& selectionColor)
+	: MenuItem(name, itemDimensions, fontColor, selectionColor)
 	, m_selectedItemIndex(0)
+	, m_color(color)
+	, m_position(position)
 {
 }
 
@@ -84,7 +84,7 @@ Setting* Menu::addSetting(const std::string& settingName, int value, int min, in
 Menu* Menu::addSubmenu(const std::string& menuName)
 {
 	m_items.push_back(
-		std::make_shared<Menu>(menuName, Maths::vec2(m_position.x + getItemDimensions().x, m_position.y), getItemDimensions(), getColor(), getFontColor(),
+		std::make_shared<Menu>(menuName, Maths::vec2(m_position.x + getItemDimensions().x, m_position.y), getItemDimensions(), m_color, getFontColor(),
 			getSelectionColor()));
 	m_items.back()->asMenu()->setEnabled(false);
 	return m_items.back()->asMenu();
@@ -93,7 +93,7 @@ Menu* Menu::addSubmenu(const std::string& menuName)
 void Menu::setPosition(const Maths::vec2& position)
 {
 	m_position = position;
-	for (auto& item : m_items) {
+	for (auto& item: m_items) {
 		if (!item->isSetting()) {
 			item->asMenu()->setPosition(Maths::vec2(m_position.x + getItemDimensions().x, m_position.y));
 		}
@@ -102,7 +102,7 @@ void Menu::setPosition(const Maths::vec2& position)
 
 Setting* Menu::getSetting(const std::string& name)
 {
-	for (auto& item : m_items) {
+	for (auto& item: m_items) {
 		if (item->isSetting()) {
 			if (item->getName() == name) {
 				return item->asSetting();
@@ -114,7 +114,7 @@ Setting* Menu::getSetting(const std::string& name)
 
 Menu* Menu::getSubmenu(const std::string& name)
 {
-	for (auto& item : m_items) {
+	for (auto& item: m_items) {
 		if (!item->isSetting()) {
 			if (item->getName() == name) {
 				return item->asMenu();
@@ -128,7 +128,7 @@ std::vector<Menu*> Menu::getSubmenusRecursive()
 {
 	std::vector<Menu*> result;
 	result.push_back(asMenu());
-	for (auto& item : m_items) {
+	for (auto& item: m_items) {
 		if (!item->isSetting()) {
 			result.push_back(item->asMenu());
 			auto tmp = item->asMenu()->getSubmenusRecursive();
@@ -167,7 +167,7 @@ void Menu::setSelectedItemIndex(int index)
 Menu* Menu::getActiveMenu()
 {
 	Menu* result = this;
-	for (auto& menu : getSubmenusRecursive()) {
+	for (auto& menu: getSubmenusRecursive()) {
 		if (menu->getEnabled()) {
 			result = menu;
 		}
@@ -207,5 +207,55 @@ void Menu::handleControls()
 			currentMenu->setEnabled(false);
 		}
 	}
+}
+
+void Menu::render(const Rendering::Renderer& renderer)
+{
+	for (auto& submenu: getSubmenusRecursive()) {
+		if (!submenu->getEnabled()) {
+			continue;
+		}
+		renderer.drawRect(submenu->m_position, Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * submenu->getItems().size()),
+			submenu->m_color);
+		renderer.drawRect(
+			Maths::vec2(submenu->m_position.x, submenu->m_position.y + submenu->getItemDimensions().y * (float)submenu->getSelectedItemIndex()),
+			submenu->getItemDimensions(),
+			submenu->getSelectionColor());
+		int itemIndex = 1;
+		for (auto& item: submenu->getItems()) {
+			renderer.drawString(
+				Maths::vec2(submenu->m_position.x, submenu->m_position.y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
+				Maths::vec2(.7),
+				item->getName(),
+				Rendering::FontStyle::Regular,
+				item->getFontColor());
+
+			std::string itemOption;
+			if (item->isSetting()) {
+				itemOption = fmt::format("[{: 2d}/{: 2d}]", item->asSetting()->getValue(),
+					item->asSetting()->getMaxValue());
+			} else {
+				itemOption = "[->]";
+			}
+			renderer.drawString(
+				Maths::vec2(submenu->m_position.x + submenu->getItemDimensions().x - 70,
+					submenu->m_position.y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
+				Maths::vec2(.7),
+				itemOption,
+				Rendering::FontStyle::Regular,
+				item->getFontColor());
+			itemIndex++;
+		}
+	}
+}
+
+bool Menu::getEnabled()
+{
+	return m_enabled;
+}
+
+void Menu::setEnabled(bool value)
+{
+	m_enabled = value;
 }
 }

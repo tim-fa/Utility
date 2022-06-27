@@ -5,7 +5,7 @@ int clamp(int value, int min, int max)
 	return std::max(std::min(max, value), min);
 }
 
-namespace Rendering::Renderables
+namespace Utility
 {
 
 bool Setting::isSetting()

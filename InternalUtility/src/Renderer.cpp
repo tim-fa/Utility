@@ -31,44 +31,6 @@ void Renderer::render()
 		} else if (type == RenderObjectType::Text) {
 			auto text = (Text*)r;
 			drawString(text->getPosition(), text->getScale(), text->getText(), text->getStyle(), text->getColor());
-		} else if (type == RenderObjectType::Menu) {
-			auto menu = (Menu*)r;
-			for (auto& submenu : menu->getSubmenusRecursive()) {
-				if (!submenu->getEnabled()) {
-					continue;
-				}
-				drawRect(submenu->getPosition(), Maths::vec2(submenu->getItemDimensions().x, submenu->getItemDimensions().y * submenu->getItems().size()),
-					submenu->getColor());
-				drawRect(
-					Maths::vec2(submenu->getPosition().x, submenu->getPosition().y + submenu->getItemDimensions().y * (float)submenu->getSelectedItemIndex()),
-					submenu->getItemDimensions(),
-					submenu->getSelectionColor());
-				int itemIndex = 1;
-				for (auto& item : submenu->getItems()) {
-					drawString(
-						Maths::vec2(submenu->getPosition().x, submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
-						Maths::vec2(1, 1),
-						item->getName(),
-						FontStyle::Regular,
-						item->getFontColor());
-
-					std::string itemOption;
-					if (item->isSetting()) {
-						itemOption = fmt::format("[{: 2d}/{: 2d}]", item->asSetting()->getValue(),
-							item->asSetting()->getMaxValue());
-					} else {
-						itemOption = "[->]";
-					}
-					drawString(
-						Maths::vec2(submenu->getPosition().x + submenu->getItemDimensions().x - 70,
-							submenu->getPosition().y + submenu->getItemDimensions().y * static_cast<float>(itemIndex)),
-						Maths::vec2(1, 1),
-						itemOption,
-						FontStyle::Regular,
-						item->getFontColor());
-					itemIndex++;
-				}
-			}
 		}
 	}
 }
