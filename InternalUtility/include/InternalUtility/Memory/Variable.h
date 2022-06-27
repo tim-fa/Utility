@@ -67,7 +67,6 @@ inline void Variable<Type, TypeSize>::initializeByOffsets(Args... offsets)
 	for (auto& offset: {offsets...}) {
 		offs.push_back(offset);
 	}
-	printf("lkj %X\n", offs.back());
 }
 
 template<typename Type, long TypeSize>

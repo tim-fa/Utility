@@ -1,4 +1,5 @@
 #include "InternalUtility/Memory/PatternScanner.h"
+#include <regex>
 
 namespace Memory
 {
@@ -23,6 +24,11 @@ std::vector<short> stringToPatternBytes(const std::string& pattern)
 
 uint64_t findPattern(const std::string& pattern)
 {
+	std::regex patternRegex(R"(^(([0-9]|[a-f]|[A-F]){2}\s?|(\?\s?))*$)");
+	std::smatch baseMatch;
+	if (!std::regex_match(pattern, baseMatch, patternRegex)) {
+		throw std::runtime_error("FindPattern(): Invalid pattern: " + pattern);
+	}
 	auto bytes = stringToPatternBytes(pattern);
 	uint64_t length = Memory::getModuleInfo(nullptr).SizeOfImage;
 	for (uint64_t adr = Memory::getModuleBase(); adr < Memory::getModuleBase() + length; adr++) {
@@ -45,6 +51,12 @@ uint64_t findPattern(const std::string& pattern)
 
 uint64_t findPlaceholderAddress(const std::string& pattern)
 {
+	std::regex patternRegex(R"(^(([0-9]|[a-f]|[A-F]){2}\s?|(\?\s?){4})*$)");
+	std::smatch baseMatch;
+	if (!std::regex_match(pattern, baseMatch, patternRegex)) {
+		throw std::runtime_error("FindPlaceholderAddress(): Invalid pattern: " + pattern + ". Correct example: FF FF FF ? ? ? ? FF");
+	}
+
 	uint64_t startAdr = 0;
 	auto address = findPattern(pattern);
 	auto bytes = stringToPatternBytes(pattern);
