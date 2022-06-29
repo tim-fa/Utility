@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace Memory
+namespace Hooking
 {
 extern void* detour(unsigned char* src, const unsigned char* dst, int len);
 

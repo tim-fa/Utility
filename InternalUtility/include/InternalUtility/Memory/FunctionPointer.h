@@ -5,9 +5,10 @@
 
 #include <vector>
 #include "InternalUtility.h"
+#include "Typedefs.h"
 #include "Variable.h"
 
-namespace Memory {
+namespace Hooking {
     template<typename ReturnType, typename... Arguments>
     class FunctionPointer {
     public:
@@ -18,7 +19,7 @@ namespace Memory {
         }
 
         void initialize(long offset) {
-            address.initialize(offset);
+            address.initializeByOffsets(offset);
         }
 
         ReturnType operator()(Arguments... arguments) {
@@ -26,12 +27,12 @@ namespace Memory {
             return func(arguments...);
         }
 
-        Variable<uint64_t> getAddressPointer() {
+        Variable<BaseType_t> getAddressPointer() {
             return address;
         }
 
     private:
-        Variable<uint64_t> address;
+        Variable<BaseType_t> address;
     };
 }
 

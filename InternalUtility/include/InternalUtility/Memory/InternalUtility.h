@@ -5,11 +5,13 @@
 #include <string>
 #include <Psapi.h>
 
-namespace Memory
+#include "InternalUtility/Memory/Typedefs.h"
+
+namespace Hooking
 {
 extern PEB* getPeb();
-extern uint64_t getModuleBase();
-extern uint64_t offsetToModuleAddress(uint64_t offset);
+extern BaseType_t getModuleBase();
+extern BaseType_t offsetToModuleAddress(BaseType_t offset);
 extern MODULEINFO getModuleInfo(const char* moduleName);
 
 }

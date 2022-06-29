@@ -3,14 +3,15 @@
 #include <stdexcept>
 #include <exception>
 #include "InternalUtility.h"
-#include "Log/Logger.h"
+#include "Typedefs.h"
 #include "PatternScanner.h"
+#include "Log/Logger.h"
 
 #undef __try
 
 #define DebugPrintPointerPath(var) Log::Logger::Debug("{}:", #var); var.printPointerPath()
 
-namespace Memory
+namespace Hooking
 {
 template<typename Type = long, long TypeSize = 0>
 class Variable
@@ -39,7 +40,7 @@ class Variable
 
 		Type& operator[](int index);
 
-		uint64_t getAddress();
+		BaseType_t getAddress();
 
 		void setValue(Type value);
 
@@ -48,7 +49,7 @@ class Variable
 
 		void addOffset(long offset);
 
-		uint64_t currentAddress{0};
+		BaseType_t currentAddress{0};
 		std::vector<int> offs;
 };
 
@@ -72,10 +73,10 @@ inline void Variable<Type, TypeSize>::initializeByOffsets(Args... offsets)
 template<typename Type, long TypeSize>
 inline void Variable<Type, TypeSize>::printPointerPath()
 {
-	uint64_t curAdr = Memory::getModuleBase();
+	BaseType_t curAdr = getModuleBase();
 	int i = 0;
 	for (auto& offset: offs) {
-		uint64_t pointedValue = *(uint64_t*)(curAdr + offset);
+		BaseType_t pointedValue = *(BaseType_t*)(curAdr + offset);
 		Log::Logger::d("Level {:2d}: 0x{:010X} + 0x{:06X} [0x{:010X}] -> 0x{:X} (Decimal: {:d})\n", i++, curAdr, offset,
 			curAdr + offset, pointedValue, pointedValue);
 		curAdr = pointedValue;
@@ -124,7 +125,7 @@ inline Type& Variable<Type, TypeSize>::operator[](int index)
 }
 
 template<typename Type, long TypeSize>
-uint64_t Variable<Type, TypeSize>::getAddress()
+BaseType_t Variable<Type, TypeSize>::getAddress()
 {
 	__try
 	{
@@ -146,17 +147,17 @@ void Variable<Type, TypeSize>::setValue(Type value)
 template<typename Type, long TypeSize>
 void Variable<Type, TypeSize>::initializePointer()
 {
-	currentAddress = Memory::getModuleBase();
+	currentAddress = getModuleBase();
 	bool first = true;
 	for (auto& offset: offs) {
 		if (!first) {
-			currentAddress = *(uint64_t*)currentAddress;
+			currentAddress = *(BaseType_t*)currentAddress;
 		}
 		currentAddress = currentAddress + offset;
 		first = false;
 	}
-	*(uint64_t*)currentAddress++;
-	*(uint64_t*)currentAddress--;
+	*(BaseType_t*)currentAddress++;
+	*(BaseType_t*)currentAddress--;
 }
 
 template<typename Type, long TypeSize>
@@ -169,6 +170,6 @@ Type Variable<Type, TypeSize>::operator&=(Type value)
 template<typename Type, long TypeSize>
 inline void Variable<Type, TypeSize>::initializeByPattern(const std::string& pattern)
 {
-	initializeByOffsets(Memory::findPlaceholderAddress(pattern) - Memory::getModuleBase());
+	initializeByOffsets(findPlaceholderAddress(pattern) - getModuleBase());
 }
 }

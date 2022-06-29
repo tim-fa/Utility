@@ -1,7 +1,7 @@
 #include "InternalUtility/Memory/PatternScanner.h"
 #include <regex>
 
-namespace Memory
+namespace Hooking
 {
 std::vector<short> stringToPatternBytes(const std::string& pattern)
 {
@@ -22,7 +22,7 @@ std::vector<short> stringToPatternBytes(const std::string& pattern)
 	return bytes;
 }
 
-uint64_t findPattern(const std::string& pattern)
+BaseType_t findPattern(const std::string& pattern)
 {
 	std::regex patternRegex(R"(^(([0-9]|[a-f]|[A-F]){2}\s?|(\?\s?))*$)");
 	std::smatch baseMatch;
@@ -30,8 +30,8 @@ uint64_t findPattern(const std::string& pattern)
 		throw std::runtime_error("FindPattern(): Invalid pattern: " + pattern);
 	}
 	auto bytes = stringToPatternBytes(pattern);
-	uint64_t length = Memory::getModuleInfo(nullptr).SizeOfImage;
-	for (uint64_t adr = Memory::getModuleBase(); adr < Memory::getModuleBase() + length; adr++) {
+	BaseType_t length = getModuleInfo(nullptr).SizeOfImage;
+	for (BaseType_t adr = getModuleBase(); adr < getModuleBase() + length; adr++) {
 		auto* currentByte = reinterpret_cast<unsigned char*>(adr);
 
 		if (*currentByte == bytes[0]) {
@@ -49,7 +49,7 @@ uint64_t findPattern(const std::string& pattern)
 	throw std::runtime_error("Pattern not found: " + pattern);
 }
 
-uint64_t findPlaceholderAddress(const std::string& pattern)
+BaseType_t findPlaceholderAddress(const std::string& pattern)
 {
 	std::regex patternRegex(R"(^(([0-9]|[a-f]|[A-F]){2}\s?|(\?\s?){4})*$)");
 	std::smatch baseMatch;
@@ -57,7 +57,7 @@ uint64_t findPlaceholderAddress(const std::string& pattern)
 		throw std::runtime_error("FindPlaceholderAddress(): Invalid pattern: " + pattern + ". Correct example: FF FF FF ? ? ? ? FF");
 	}
 
-	uint64_t startAdr = 0;
+	BaseType_t startAdr = 0;
 	auto address = findPattern(pattern);
 	auto bytes = stringToPatternBytes(pattern);
 	for (int i = 0; i < bytes.size(); i++) {
@@ -69,7 +69,7 @@ uint64_t findPlaceholderAddress(const std::string& pattern)
 	if (!startAdr) {
 		throw std::runtime_error("Could not find pattern placeholder in pattern: " + pattern);
 	}
-	uint64_t relativeAddress = 0;
+	BaseType_t relativeAddress = 0;
 	for (int i = 0; i < 4; i++) {
 		relativeAddress |= reinterpret_cast<byte*>(startAdr)[i] << i * 8;
 	}

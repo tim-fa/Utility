@@ -1,6 +1,6 @@
 #include "InternalUtility/Rendering/Menu.h"
 
-#include <fmt/format.h>
+#include "fmt/format.h"
 #include <Windows.h>
 
 namespace Utility

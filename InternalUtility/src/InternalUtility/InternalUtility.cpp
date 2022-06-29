@@ -1,25 +1,24 @@
 #include <cstdint>
 #include "InternalUtility/Memory/InternalUtility.h"
 
-namespace Memory
+namespace Hooking
 {
 PEB* getPeb()
 {
-#ifdef _WIN64
+#ifdef PLATFORM64
 	PEB* peb = (PEB*)__readgsqword(0x60);
 #else
 	PEB* peb = (PEB*)__readfsdword(0x30);
 #endif
-
 	return peb;
 }
 
-uint64_t getModuleBase()
+BaseType_t getModuleBase()
 {
-	return (uint64_t)(size_t)getPeb()->Reserved3[1];
+	return (BaseType_t)(size_t)getPeb()->Reserved3[1];
 }
 
-uint64_t offsetToModuleAddress(uint64_t offset)
+BaseType_t offsetToModuleAddress(BaseType_t offset)
 {
 	return getModuleBase() + offset;
 }

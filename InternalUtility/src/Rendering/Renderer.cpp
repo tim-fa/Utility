@@ -1,6 +1,6 @@
 #include "InternalUtility/Rendering/Renderer.h"
 #include "InternalUtility/Rendering/BorderedRectangle.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 #include <chrono>
 #include <thread>
 

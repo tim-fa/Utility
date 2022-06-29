@@ -1,11 +1,11 @@
 #include <stdexcept>
-#include <InternalUtility/Memory/ForcedExceptionHook.h>
-#include <Log/Logger.h>
+#include "InternalUtility/Memory/ForcedExceptionHook.h"
+#include "Log/Logger.h"
 
 #define EXCEPTION_VAL 0xFFFFFF00
 #define EXCEPTION_VAL_COUNTER_MASK 0xFF
 
-#ifdef AAA
+#ifdef PLATFORM32
 #define EAX Eax
 #define EDX Edx
 #define ECX Ecx
@@ -14,7 +14,7 @@
 #define EIP Eip
 #define EBP Ebp
 #define EDI Edi
-#else
+#elif defined(PLATFORM64)
 #define EAX Rax
 #define EDX Rdx
 #define ECX Rcx
@@ -25,7 +25,7 @@
 #define EDI Rdi
 #endif
 
-namespace Memory
+namespace Hooking
 {
 
 void printRegisters(EXCEPTION_POINTERS* exceptionInfo)
@@ -114,7 +114,7 @@ void ForcedExceptionHook::initialize()
 	AddVectoredExceptionHandler(1, crashHandler);
 }
 
-void ForcedExceptionHook::addHook(uint32_t pointerAddress, uint32_t expectedExceptionAddress, const FEHookCallback& callback, bool debugOutput)
+void ForcedExceptionHook::addHook(BaseType_t pointerAddress, BaseType_t expectedExceptionAddress, const FEHookCallback& callback, bool debugOutput)
 {
 	if (hookContexts.size() >= EXCEPTION_VAL_COUNTER_MASK) {
 		throw std::runtime_error("Maximal number of hooks reached!");
@@ -130,7 +130,7 @@ void ForcedExceptionHook::addHook(uint32_t pointerAddress, uint32_t expectedExce
 	ctx.debugOutput = debugOutput;
 
 	hookContexts.push_back(ctx);
-	*(uint32_t*)ctx.pointerAddress = ctx.exceptionValue;
+	*(BaseType_t*)ctx.pointerAddress = ctx.exceptionValue;
 
 	if (ctx.debugOutput) {
 		Log::Logger::Debug("Address: 0x{:X}", ctx.pointerAddress);

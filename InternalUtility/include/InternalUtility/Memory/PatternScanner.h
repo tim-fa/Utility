@@ -6,9 +6,10 @@
 #include <Psapi.h>
 
 #include "InternalUtility.h"
+#include "Typedefs.h"
 
-namespace Memory
+namespace Hooking
 {
-extern uint64_t findPattern(const std::string& pattern);
-extern uint64_t findPlaceholderAddress(const std::string& pattern);
+extern BaseType_t findPattern(const std::string& pattern);
+extern BaseType_t findPlaceholderAddress(const std::string& pattern);
 }

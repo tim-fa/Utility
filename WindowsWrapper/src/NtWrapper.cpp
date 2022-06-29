@@ -14,6 +14,7 @@ void init()
 		auto address = (long)GetProcAddress(ntHandle, "NtProtectVirtualMemory");
 		if (address) {
 			NtProtectVirtualMemory = (tNtProtectVirtualMemory)address;
+			isInitialized = true;
 		}
 	}
 }
