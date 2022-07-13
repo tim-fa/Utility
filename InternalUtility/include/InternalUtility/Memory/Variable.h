@@ -68,10 +68,6 @@ class Variable
 		{
 			return (DataType*)getAddress();
 		}
-		DataType* operator->()
-		{
-			return (DataType*)getAddress();
-		}
 		BaseType_t getAddress()
 		{
 			__try
@@ -114,9 +110,20 @@ class Variable
 		std::vector<int> offs;
 };
 
-
 template<typename DataType>
-class Variable<DataType[]> : public Variable<DataType>
+class Variable<DataType*> : public Variable<DataType>
+{
+	public:
+		DataType* operator->()
+		{
+			return (DataType*)Variable<DataType>::getAddress();
+		}
+};
+
+
+// Arrays can be interpreted as pointers
+template<typename DataType>
+class Variable<DataType[]> : public Variable<DataType*>
 {
 	public:
 		DataType& operator[](int index)
