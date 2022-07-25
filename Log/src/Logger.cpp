@@ -15,8 +15,11 @@ namespace Log
 {
 	void enableConsole()
 	{
-		AllocConsole();
-		freopen("CONOUT$", "w", stdout);
+        AllocConsole();
+        FILE* fDummy;
+        freopen_s(&fDummy, "CONIN$", "r", stdin);
+        freopen_s(&fDummy, "CONOUT$", "w", stderr);
+        freopen_s(&fDummy, "CONOUT$", "w", stdout);
 	}
 
 	Logger::Logger(std::string name)
