@@ -3,6 +3,15 @@
 #include <random>
 #include <sstream>
 
+namespace Obfuscation
+{
+enum SplitCount : int
+{
+	Split2 = 2,
+	Split4 = 4,
+	Split8 = 8
+};
+
 int randomInt()
 {
 	static std::random_device dev;
@@ -15,21 +24,21 @@ template<typename Type>
 class Obfuscator
 {
 	public:
-		explicit Obfuscator(Type value = 0, int numberOfSlots = 4)
-			: bitMasks(new int[numberOfSlots])
-			, bitStartIndex(new short[numberOfSlots])
-			, data(new int[numberOfSlots])
-			, numberOfSlots(numberOfSlots)
+		explicit Obfuscator(Type value = 0, SplitCount splitCount = SplitCount::Split2)
+			: bitMasks(new int[splitCount])
+			, bitStartIndex(new short[splitCount])
+			, data(new int[splitCount])
+			, splitCount(splitCount)
 		{
 			verificationHash = randomInt();
 
-			if (numberOfSlots > sizeof(Type) * 8) {
-				throw std::runtime_error("Number of slots can not be bigger than number of bits");
+			int varBits = sizeof(Type) * 8;
+			if (splitCount > varBits) {
+				throw std::runtime_error("A " + std::to_string(varBits) + "-Bit Variable can not be split in to more than " + std::to_string(varBits) + " individual Variables");
 			}
-			typeSizeBits = sizeof(Type) * 8;
-			bitsPerSlot = typeSizeBits / numberOfSlots;
+			bitsPerSlot =  sizeof(Type) * 8 / splitCount;
 
-			for (int maskIdx = 0; maskIdx < numberOfSlots; maskIdx++) {
+			for (int maskIdx = 0; maskIdx < splitCount; maskIdx++) {
 				bitMasks[maskIdx] = 0;
 				for (int i = 0; i < bitsPerSlot; i++) {
 					bitMasks[maskIdx] |= (1 << (i + bitsPerSlot * maskIdx));
@@ -41,7 +50,7 @@ class Obfuscator
 		__forceinline void set(Type value)
 		{
 			static std::hash<unsigned int> bitsHash;
-			for (int i = 0; i < numberOfSlots; i++) {
+			for (int i = 0; i < splitCount; i++) {
 				bitStartIndex[i] = randomInt() % (sizeof(int) * 8 - bitsPerSlot);
 				unsigned int bitsToSetMask = bitMasks[0] << bitStartIndex[i];
 				unsigned int bitsToSet = ~value & bitMasks[i];
@@ -57,13 +66,13 @@ class Obfuscator
 		{
 			static std::hash<unsigned int> bitsHash;
 			Type returnValue = 0;
-			for (int slotIdx = 0; slotIdx < numberOfSlots; slotIdx++) {
+			for (int slotIdx = 0; slotIdx < splitCount; slotIdx++) {
 				unsigned int dataBits = (~data[slotIdx] >> bitStartIndex[slotIdx]) & bitMasks[0];
 				unsigned int readBitsMask = bitMasks[0] << bitStartIndex[slotIdx];
 				unsigned int actualHash = data[slotIdx] & ~readBitsMask;
 				unsigned int calculatedHash = (verificationHash ^ static_cast<unsigned int>(bitsHash(dataBits))) & ~readBitsMask;
 				if (calculatedHash != actualHash) {
-					printf("ERROR: value was changed!!!!!\n");
+					throw std::runtime_error("Value was modified illegally");
 				}
 				returnValue |= dataBits << bitsPerSlot * slotIdx;
 			}
@@ -108,11 +117,11 @@ class Obfuscator
 		}
 
 	private:
-		int numberOfSlots;
-		int typeSizeBits;
+		SplitCount splitCount;
 		int bitsPerSlot;
 		int verificationHash;
 		std::shared_ptr<int[]> bitMasks;
 		std::shared_ptr<short[]> bitStartIndex;
 		std::shared_ptr<int[]> data;
 };
+}
