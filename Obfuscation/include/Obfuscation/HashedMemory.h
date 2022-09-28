@@ -18,13 +18,13 @@ public:
             : m_memorySize(size * 2 + 1), m_dataMemory(new unsigned char[m_memorySize]), m_initialized(false) {
     }
 
-    __forceinline int getMemoryHash() {
+    __forceinline size_t getMemoryHash() {
         size_t fullMapHash = 0;
-        for (int dataIdx = 0; dataIdx < floor(m_memorySize / 2); dataIdx++) {
+        for (int dataIdx = 0; dataIdx < floor(m_memorySize / 2) && m_initialized; dataIdx++) {
             static std::hash<int> hg;
             fullMapHash += hg(m_dataMemory[dataIdx * 2]);
             fullMapHash += hg(m_dataMemory[dataIdx * 2 + 1]);
-            //fullMapHash += hg(m_hashSeeds[dataIdx]);
+            fullMapHash += hg(m_hashSeeds[dataIdx]);
         }
         return fullMapHash;
     }
@@ -32,17 +32,17 @@ public:
     __forceinline void writeMemoryHash()
     {
         m_lastMapHash = 0;
-        for (int dataIdx = 0; dataIdx < floor(m_memorySize / 2); dataIdx++) {
+        for (int dataIdx = 0; dataIdx < floor(m_memorySize / 2) && m_initialized; dataIdx++) {
             static std::hash<int> hg;
             m_dataMemory[dataIdx * 2 + 1] = static_cast<unsigned char>(randomInt());
             m_lastMapHash += hg(m_dataMemory[dataIdx * 2]);
             m_lastMapHash += hg(m_dataMemory[dataIdx * 2 + 1]);
-           // m_lastMapHash += hg(m_hashSeeds[dataIdx]);
+            m_lastMapHash += hg(m_hashSeeds[dataIdx]);
         }
     }
     __forceinline void write(unsigned char *data) {
         m_hashSeeds.clear();
-        if (getMemoryHash() != m_lastMapHash && m_initialized){
+        if (getMemoryHash() != m_lastMapHash){
             throw std::runtime_error("Illegal write operation on data!");
         }
         m_initialized = true;
@@ -57,7 +57,7 @@ public:
     }
 
     __forceinline std::shared_ptr<unsigned char[]> read() {
-        if (getMemoryHash() != m_lastMapHash && m_initialized){
+        if (getMemoryHash() != m_lastMapHash){
             throw std::runtime_error("Illegal write operation on data!");
         }
         std::shared_ptr<unsigned char[]> result(new unsigned char[floor(m_memorySize / 2)]);
