@@ -11,7 +11,7 @@ namespace Obfuscation {
 
     template<typename Type>
     Obfuscator<Type>::Obfuscator()
-            : memory(sizeof(Type), WriteDetectionMode::AccessViolationOnWrite) {
+            : memory(sizeof(Type), WriteDetectionMode::ExceptionOnWrite) {
     }
 
     template<typename Type>

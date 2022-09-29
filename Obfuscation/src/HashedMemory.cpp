@@ -14,13 +14,13 @@ namespace Obfuscation {
 
     HashedMemory::HashedMemory(int size, WriteDetectionMode wdm)
             : m_memorySize(size * 2 + 1), m_dataMemory(new unsigned char[m_memorySize]),
-              m_writeDetectionMode(wdm) {
+              m_writeDetectionMode(wdm), m_lastMapHash(0) {
     }
 
     void HashedMemory::writeDetected() {
         if (m_writeDetectionMode == WriteDetectionMode::AccessViolationOnWrite) {
             *(int *) nullptr = 1337;
-        } else if (m_writeDetectionMode == WriteDetectionMode::AccessViolationOnWrite) {
+        } else if (m_writeDetectionMode == WriteDetectionMode::ExceptionOnWrite) {
             throw std::runtime_error("Illegal write operation on data!");
         }
     }
