@@ -1,6 +1,9 @@
 #pragma once
+
 #include <memory>
 #include <vector>
+#include <stdexcept>
+#include <functional>
 
 namespace Obfuscation {
 
@@ -14,8 +17,14 @@ namespace Obfuscation {
 
     class HashedMemory {
     public:
-        HashedMemory(int size, WriteDetectionMode wdm);
-        __forceinline void write(unsigned char *data) {
+        HashedMemory(WriteDetectionMode wdm);
+
+        __forceinline void write(unsigned char *data, int size) {
+            if (m_memorySize != size * 2 + 1) {
+                m_memorySize = size * 2 + 1;
+                m_dataMemory = std::shared_ptr<unsigned char[]>(new unsigned char[m_memorySize]);
+            }
+            m_initialized = true;
             m_hashSeeds.clear();
             m_lastMapHash = 0;
             for (int dataIdx = 0; dataIdx < floor(m_memorySize / 2); dataIdx++) {
@@ -32,6 +41,8 @@ namespace Obfuscation {
         }
 
         __forceinline std::shared_ptr<unsigned char[]> read() {
+            if (!m_initialized)
+                throw std::runtime_error("Tried to read uninitialized memory");
             size_t fullMapHash = 0;
             std::shared_ptr<unsigned char[]> result(new unsigned char[floor(m_memorySize / 2)]);
             for (int dataIdx = 0; dataIdx < floor(m_memorySize / 2); dataIdx++) {
@@ -50,11 +61,12 @@ namespace Obfuscation {
     private:
         void writeDetected();
 
-        const int m_memorySize;
+        int m_memorySize{0};
         std::shared_ptr<unsigned char[]> m_dataMemory;
-        size_t m_lastMapHash{};
+        size_t m_lastMapHash{0};
         std::vector<int> m_hashSeeds;
         static std::hash<int> m_hashGenerator;
         WriteDetectionMode m_writeDetectionMode;
+        bool m_initialized{false};
     };
 }

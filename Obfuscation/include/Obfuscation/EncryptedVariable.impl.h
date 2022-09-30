@@ -11,7 +11,7 @@ namespace Obfuscation {
 
     template<typename Type>
     EncryptedVariable<Type>::EncryptedVariable()
-            : memory(sizeof(Type), WriteDetectionMode::ExceptionOnWrite) {
+            : memory(WriteDetectionMode::ExceptionOnWrite) {
     }
 
     template<typename Type>
@@ -41,7 +41,7 @@ namespace Obfuscation {
 
     template<typename Type>
     EncryptedVariable<Type> &EncryptedVariable<Type>::operator=(const Type &value) {
-        set(value);
+        set(value, sizeof(value));
         return *this;
     }
 
@@ -52,8 +52,8 @@ namespace Obfuscation {
     }
 
     template<typename Type>
-    void EncryptedVariable<Type>::set(Type value) {
-        memory.write(reinterpret_cast<unsigned char*>(&value));
+    void EncryptedVariable<Type>::set(Type value, int size) {
+        memory.write(reinterpret_cast<unsigned char*>(&value), size);
     }
 
 }

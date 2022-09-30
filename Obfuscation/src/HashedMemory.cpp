@@ -12,9 +12,8 @@ namespace Obfuscation {
     }
 
 
-    HashedMemory::HashedMemory(int size, WriteDetectionMode wdm)
-            : m_memorySize(size * 2 + 1), m_dataMemory(new unsigned char[m_memorySize]),
-              m_writeDetectionMode(wdm), m_lastMapHash(0) {
+    HashedMemory::HashedMemory(WriteDetectionMode wdm)
+            : m_writeDetectionMode(wdm){
     }
 
     void HashedMemory::writeDetected() {

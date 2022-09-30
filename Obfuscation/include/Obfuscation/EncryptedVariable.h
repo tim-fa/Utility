@@ -4,14 +4,12 @@
 
 namespace Obfuscation {
 
-
-
     template<typename Type>
     class EncryptedVariable {
     public:
         explicit EncryptedVariable();
 
-        __forceinline void set(Type value);
+        __forceinline void set(Type value, int size);
 
         __forceinline Type get();
 
@@ -27,7 +25,22 @@ namespace Obfuscation {
 
         __forceinline EncryptedVariable<Type> operator--(int);
 
-    private:
+    protected:
         HashedMemory memory;
+    };
+
+    template<typename Type>
+    class EncryptedVariable<Type*> : public EncryptedVariable<__int64> {
+    public:
+        __forceinline EncryptedVariable<Type*> &operator=(Type* value)
+        {
+            this->set((__int64)value, sizeof(__int64));
+            return *this;
+        }
+
+        __forceinline Type* operator->()
+        {
+            return (Type*)this->get();
+        }
     };
 }
