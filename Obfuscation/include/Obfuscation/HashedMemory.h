@@ -4,8 +4,11 @@
 #include <vector>
 #include <stdexcept>
 #include <functional>
+#include "XorString.h"
 
 namespace Obfuscation {
+
+
 
     extern int randomInt();
 
@@ -27,10 +30,9 @@ namespace Obfuscation {
             m_initialized = true;
             m_hashSeeds.clear();
             m_lastMapHash = 0;
-            memcpy_s(m_dataMemory.get(), m_memorySize, data, m_memorySize);
             for (int dataIdx = 0; dataIdx < m_memorySize; dataIdx++) {
                 m_hashSeeds.push_back(randomInt());
-                m_dataMemory[dataIdx] = ~m_dataMemory[dataIdx] ^ m_hashSeeds.back();
+                m_dataMemory[dataIdx] = ~data[dataIdx] ^ m_hashSeeds.back();
                 m_lastMapHash += m_hashGenerator(m_hashSeeds.back());
                 m_lastMapHash += m_hashGenerator(data[dataIdx]);
             }
@@ -39,12 +41,11 @@ namespace Obfuscation {
 
         __forceinline std::shared_ptr<unsigned char[]> read() {
             if (!m_initialized)
-                throw std::runtime_error("Tried to read uninitialized memory");
+                throw std::runtime_error(XorStr("Tried to read uninitialized memory"));
             size_t fullMapHash = 0;
             std::shared_ptr<unsigned char[]> result(new unsigned char[m_memorySize]);
-            memcpy_s(result.get(), m_memorySize, m_dataMemory.get(), m_memorySize);
             for (int dataIdx = 0; dataIdx < m_memorySize; dataIdx++) {
-                result[dataIdx] = ~result[dataIdx] ^ m_hashSeeds[dataIdx];
+                result[dataIdx] = ~m_dataMemory[dataIdx] ^ m_hashSeeds[dataIdx];
                 fullMapHash += m_hashGenerator(m_hashSeeds[dataIdx]);
                 fullMapHash += m_hashGenerator(result[dataIdx]);
             }

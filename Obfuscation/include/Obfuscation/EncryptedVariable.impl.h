@@ -24,7 +24,7 @@ namespace Obfuscation {
     template<typename Type>
     EncryptedVariable<Type> EncryptedVariable<Type>::operator++(int) {
         auto result = get() + 1;
-        set(result);
+        set(result, sizeof(Type));
         return *this;
     }
 

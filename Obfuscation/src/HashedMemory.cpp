@@ -1,6 +1,6 @@
 #include <random>
 #include "Obfuscation/HashedMemory.h"
-
+#include "Obfuscation/XorString.h"
 
 namespace Obfuscation {
 
@@ -20,7 +20,7 @@ namespace Obfuscation {
         if (m_writeDetectionMode == WriteDetectionMode::AccessViolationOnWrite) {
             *(int *) nullptr = 1337;
         } else if (m_writeDetectionMode == WriteDetectionMode::ExceptionOnWrite) {
-            throw std::runtime_error("Illegal write operation on data!");
+            throw std::runtime_error(XorStr("An encrypted memory region was written illegally"));
         }
     }
 }
