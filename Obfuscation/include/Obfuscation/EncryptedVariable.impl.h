@@ -1,58 +1,58 @@
 #pragma once
 
-#include "Obfuscator.h"
+#include "EncryptedVariable.h"
 
 namespace Obfuscation {
 
     template<typename Type>
-    Obfuscator<Type>::operator Type() {
+    EncryptedVariable<Type>::operator Type() {
         return get();
     }
 
     template<typename Type>
-    Obfuscator<Type>::Obfuscator()
+    EncryptedVariable<Type>::EncryptedVariable()
             : memory(sizeof(Type), WriteDetectionMode::ExceptionOnWrite) {
     }
 
     template<typename Type>
-    Obfuscator<Type> Obfuscator<Type>::operator--(Type) {
+    EncryptedVariable<Type> EncryptedVariable<Type>::operator--(int) {
         auto result = get() - 1;
         set(result);
         return *this;
     }
 
     template<typename Type>
-    Obfuscator<Type> Obfuscator<Type>::operator++(Type) {
+    EncryptedVariable<Type> EncryptedVariable<Type>::operator++(int) {
         auto result = get() + 1;
         set(result);
         return *this;
     }
 
     template<typename Type>
-    Type Obfuscator<Type>::get() {
+    Type EncryptedVariable<Type>::get() {
         return *(Type*)memory.read().get();
     }
 
     template<typename Type>
-    Obfuscator<Type> Obfuscator<Type>::operator-(const Type &value) {
+    EncryptedVariable<Type> EncryptedVariable<Type>::operator-(const Type &value) {
         auto result = get() - value;
         return Obfuscator<Type>(result);
     }
 
     template<typename Type>
-    Obfuscator<Type> &Obfuscator<Type>::operator=(const Type &value) {
+    EncryptedVariable<Type> &EncryptedVariable<Type>::operator=(const Type &value) {
         set(value);
         return *this;
     }
 
     template<typename Type>
-    Obfuscator<Type> Obfuscator<Type>::operator+(const Type &value) {
+    EncryptedVariable<Type> EncryptedVariable<Type>::operator+(const Type &value) {
         auto result = get() + value;
         return Obfuscator<Type>(result);
     }
 
     template<typename Type>
-    void Obfuscator<Type>::set(Type value) {
+    void EncryptedVariable<Type>::set(Type value) {
         memory.write(reinterpret_cast<unsigned char*>(&value));
     }
 
