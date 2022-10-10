@@ -26,7 +26,7 @@ MODULEINFO getModuleInfo(const char* moduleName)
 {
 	MODULEINFO modInfo = {nullptr};
 	HMODULE hModule = GetModuleHandleA(moduleName);
-	if (hModule == 0) {
+	if (hModule == nullptr) {
 		return modInfo;
 	}
 	GetModuleInformation(GetCurrentProcess(), hModule, &modInfo, sizeof(MODULEINFO));

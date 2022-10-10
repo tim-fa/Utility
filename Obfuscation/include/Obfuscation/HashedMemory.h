@@ -62,7 +62,7 @@ namespace Obfuscation {
         std::shared_ptr<unsigned char[]> m_dataMemory;
         size_t m_lastMapHash{0};
         std::vector<int> m_hashSeeds;
-        static std::hash<int> m_hashGenerator;
+        inline static std::hash<int> m_hashGenerator;
         WriteDetectionMode m_writeDetectionMode;
         bool m_initialized{false};
     };

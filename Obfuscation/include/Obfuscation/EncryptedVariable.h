@@ -41,5 +41,9 @@ namespace Obfuscation {
         __forceinline Type* decryptPointer(){
             return (Type*)this->get();
         }
+
+        __forceinline Type& operator*(){
+            return *decryptPointer();
+        }
     };
 }
