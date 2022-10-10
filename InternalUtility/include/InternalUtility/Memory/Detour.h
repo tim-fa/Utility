@@ -6,41 +6,37 @@
 #include <Windows.h>
 #include <string>
 #include <memory>
+#include <utility>
 #include <vector>
 
-namespace Hooking
-{
-extern void* detour(unsigned char* src, const unsigned char* dst, int len);
+namespace Hooking {
+    extern void *detour(unsigned char *src, const unsigned char *dst, int len);
 
-class DetourHook
-{
-		struct RelativeInstruction
-		{
-			RelativeInstruction(const std::string& instructionName, byte bytes[], int numBytes)
-			{
-				name = instructionName;
-				instructionBytes = std::shared_ptr<byte[]>(new byte[numBytes]);
-				memcpy_s(instructionBytes.get(), numBytes, bytes, numBytes);
-				length = numBytes;
-			}
+    class DetourHook {
+        struct RelativeInstruction {
+            RelativeInstruction(const std::string &instructionName, const std::vector<byte> &bytes)
+                    : name(instructionName), bytes(bytes) {
+            }
 
-			std::string name;
-			std::shared_ptr<byte[]> instructionBytes;
-			int length;
-		};
+            std::string name;
+            std::vector<byte> bytes;
+        };
 
-	public:
+    public:
 
-		DetourHook();
-		void* trampoline64(void* src, void* dst, int len);
+        DetourHook();
 
-	private:
-		void* findCodeCave(void* startAdr, int len);
-		int relativeJumpPresent(void* address);
-		void addRelativeInstruction(const std::string& instructionName, byte instructionBytes[], int numBytes);
+        void *trampoline64(void *src, void *dst, int len);
 
-		std::vector<RelativeInstruction> m_relativeInstructions;
-};
+    private:
+        void *findCodeCave(void *startAdr, int len);
+
+        int relativeJumpPresent(void *address);
+
+        void addRelativeInstruction(const std::string &instructionName, const std::vector<byte> &bytes);
+
+        std::vector<RelativeInstruction> m_relativeInstructions;
+    };
 }
 
 #endif

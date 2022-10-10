@@ -26,12 +26,12 @@ int DetourHook::relativeJumpPresent(void* address)
 	byte* currentByte = (byte*)address;
 	for (auto& relativeInstruction: m_relativeInstructions) {
 		bool isRelative = true;
-		for (int i = 0; i < relativeInstruction.length; i++) {
-			isRelative &= currentByte[i] == relativeInstruction.instructionBytes[i];
+		for (int i = 0; i < relativeInstruction.bytes.size(); i++) {
+			isRelative &= currentByte[i] == relativeInstruction.bytes[i];
 		}
 		if (isRelative) {
-			Log::Logger::Info("Found {:s} instruction with relative address", relativeInstruction.name);
-			return relativeInstruction.length;
+			Log::Logger::Info("Found {:d}-byte '{:s}' instruction with relative address", relativeInstruction.bytes.size(), relativeInstruction.name);
+			return static_cast<int>(relativeInstruction.bytes.size());
 		}
 	}
 	return false;
@@ -122,18 +122,12 @@ void* DetourHook::trampoline64(void* src, void* dst, int len)
 
 DetourHook::DetourHook()
 {
-	byte callBytes[] = {0xE8};
-	byte incBytes[] ={0xFF, 0x05};
-	byte movBytes[] = {0xFF, 0x05};
-	byte movBytes2[] = {0x48, 0x8b, 0x05};
-	byte jnzBytes[] = {0x0F, 0x85};
-	byte leaBytes[] = {0x48, 0x8D, 0x05};
-	addRelativeInstruction("CALL", callBytes, 1);
-	addRelativeInstruction("INC", incBytes, 2);
-	addRelativeInstruction("MOV", movBytes, 2);
-	addRelativeInstruction("MOV", movBytes2, 3);
-	addRelativeInstruction("JNZ", jnzBytes, 2);
-	addRelativeInstruction("LEA", leaBytes, 3);
+	addRelativeInstruction("CALL", {0xE8});
+	addRelativeInstruction("INC", {0xFF, 0x05});
+	addRelativeInstruction("MOV", {0xFF, 0x05});
+	addRelativeInstruction("MOV", {0x48, 0x8b, 0x05});
+	addRelativeInstruction("JNZ", {0x0F, 0x85});
+	addRelativeInstruction("LEA", {0x48, 0x8D, 0x05});
 }
 
 void* DetourHook::findCodeCave(void* startAdr, int len)
@@ -155,8 +149,8 @@ void* DetourHook::findCodeCave(void* startAdr, int len)
 	return codeCave;
 }
 
-void DetourHook::addRelativeInstruction(const std::string& instructionName, byte instructionBytes[], int numBytes)
+void DetourHook::addRelativeInstruction(const std::string& instructionName, const std::vector<byte>& bytes)
 {
-	m_relativeInstructions.emplace_back(instructionName, instructionBytes, numBytes);
+	m_relativeInstructions.emplace_back(instructionName,bytes);
 }
 }
