@@ -7,7 +7,7 @@ namespace Obfuscation {
     int randomInt() {
         static std::random_device dev;
         static std::mt19937 rng(dev());
-        static std::uniform_int_distribution<std::mt19937::result_type> dist(1, 2 * INT_MAX);
+        static std::uniform_int_distribution<std::mt19937::result_type> dist(1, 0xFFFFFFFF);
         return dist(rng);
     }
 
