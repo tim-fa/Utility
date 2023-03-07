@@ -29,7 +29,6 @@ namespace Hooking {
         void *trampoline64(void *src, void *dst, int len);
 
     private:
-        void *findCodeCave(void *startAdr, int len);
 
         int relativeJumpPresent(void *address);
 

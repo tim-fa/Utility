@@ -5,7 +5,7 @@
 #define EXCEPTION_VAL 0xFFFFFF00
 #define EXCEPTION_VAL_COUNTER_MASK 0xFF
 
-#ifdef PLATFORM32
+#ifdef __WIN32
 #define EAX Eax
 #define EDX Edx
 #define ECX Ecx
@@ -14,7 +14,7 @@
 #define EIP Eip
 #define EBP Ebp
 #define EDI Edi
-#elif defined(PLATFORM64)
+#else
 #define EAX Rax
 #define EDX Rdx
 #define ECX Rcx

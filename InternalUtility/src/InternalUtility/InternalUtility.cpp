@@ -5,10 +5,10 @@ namespace Hooking
 {
 PEB* getPeb()
 {
-#ifdef PLATFORM64
-	PEB* peb = (PEB*)__readgsqword(0x60);
-#else
+#ifdef __WIN32
 	PEB* peb = (PEB*)__readfsdword(0x30);
+#else
+	PEB* peb = (PEB*)__readgsqword(0x60);
 #endif
 	return peb;
 }
