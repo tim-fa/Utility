@@ -5,20 +5,11 @@
 
 #undef min
 
-struct CodeCave
-{
-	BaseType_t startAddress;
-	BaseType_t size;
-	BaseType_t writeIndex;
-};
-
-class CodeCaveManager
+class CodeCave
 {
 public:
-
-	static CodeCave findCodeCave(BaseType_t startAddress, BaseType_t size)
+	CodeCave(BaseType_t startAddress, BaseType_t caveSize)
 	{
-		CodeCave codeCave{ 0, 0 };
 		BaseType_t consecutiveFreeBytes = 0;
 
 		for (BaseType_t byteIndex = 0; byteIndex < INT_MAX * 2U - 1; byteIndex++)
@@ -33,32 +24,51 @@ public:
 			{
 				consecutiveFreeBytes = 0;
 			}
-			if (consecutiveFreeBytes >= size)
+			if (consecutiveFreeBytes >= caveSize)
 			{
-				codeCave.startAddress = (startAddress + byteIndex) - size;
-				codeCave.size = size;
+				m_baseAddress = (startAddress + byteIndex) - caveSize;
+				m_size = caveSize;
 				break;
 			}
 		}
-		return codeCave;
 	}
 
-	static void writeData(CodeCave& codeCave, byte* dataBuffer, BaseType_t size)
+	BaseType_t writeData(byte* dataBuffer, BaseType_t size)
 	{
-		BaseType_t remainingSize = codeCave.size - codeCave.writeIndex;
+		BaseType_t startAddress = getCurrentAddress();
+		BaseType_t remainingSize = m_size - m_writeOffset;
 
 		if (remainingSize < size)
 		{
 			throw std::length_error("Code cave is too small!");
 		}
-		Log::Logger::Debug("Writing {:d} bytes at index {:d} ({:d} bytes free)", size, codeCave.writeIndex, remainingSize);
-		memcpy_s((void*)(codeCave.startAddress + codeCave.writeIndex), (codeCave.size - codeCave.writeIndex), dataBuffer, size);
-		codeCave.writeIndex += size;
+		Log::Logger::Debug("Writing {:d} bytes at index {:d} ({:d} bytes free)", size, m_writeOffset, remainingSize);
+		memcpy_s((void*)(m_baseAddress + m_writeOffset), (m_size - m_writeOffset), dataBuffer, size);
+		m_writeOffset += size;
+		return startAddress;
 	}
 
+	BaseType_t getWriteOffset()
+	{
+		return m_baseAddress + m_writeOffset;
+	}
 
+	BaseType_t getBaseAddress()
+	{
+		return m_baseAddress;
+	}
+
+	BaseType_t getCurrentAddress()
+	{
+		return m_baseAddress + m_writeOffset;
+	}
+
+private:
+
+	BaseType_t m_baseAddress{0};
+	BaseType_t m_size{0};
+	int m_writeOffset{0};
 };
-
 
 
 
@@ -139,11 +149,11 @@ namespace Hooking
 		//void* pTrampoline = VirtualAlloc(0, len + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 
-		CodeCave cc = CodeCaveManager::findCodeCave((BaseType_t)hookAddress, len + sizeof(stub));
+		CodeCave cc((BaseType_t)hookAddress, len + sizeof(stub));
 
-		Log::Logger::Info("Writing trampoline code to: 0x{:X}", cc.startAddress);
+		Log::Logger::Info("Writing trampoline code to: 0x{:X}", cc.getBaseAddress());
 		DWORD tmp;
-		VirtualProtect((void*)cc.startAddress, len + sizeof(stub), PAGE_EXECUTE_READWRITE, &tmp);
+		VirtualProtect((void*)cc.getBaseAddress(), len + sizeof(stub), PAGE_EXECUTE_READWRITE, &tmp);
 
 		ULONG dwOld = 0;
 		VirtualProtect(hookAddress, len, PAGE_EXECUTE_READWRITE, &dwOld);
@@ -153,15 +163,15 @@ namespace Hooking
 		// trampoline
 		memcpy(stub + 6, &returnAdrToOrig, 8);
 
-		CodeCaveManager::writeData(cc, (byte*)hookAddress, len);
-		CodeCaveManager::writeData(cc, stub, sizeof(stub));
+		BaseType_t addressToOriginalCode = cc.writeData((byte*)hookAddress, len);
+		cc.writeData(stub, sizeof(stub));
 
 		Log::Logger::Debug("Returning to original code at 0x{:X}", returnAdrToOrig);
 
 		Log::Logger::Info("Fixing relative addresses");
 		// if there is a call instruction in the source bytes which are moved to the trampoline the relative offsets have to be recalculated
 		for (int i = 0; i < len; i++) {
-			BYTE* currentByte = (BYTE*)(cc.startAddress + i);
+			BYTE* currentByte = (BYTE*)(addressToOriginalCode + i);
 			int relativeJumpInstructionLength = relativeJumpPresent((void*)currentByte);
 			if (relativeJumpInstructionLength) {
 				auto origRelAdrLocation = (void*)((uintptr_t)hookAddress + i + relativeJumpInstructionLength);
@@ -180,7 +190,7 @@ namespace Hooking
 
 		VirtualProtect(hookAddress, len, dwOld, &dwOld);
 		Log::Logger::Info("Hook installed successfully");
-		return (void*)cc.startAddress;
+		return (void*)addressToOriginalCode;
 	}
 
 	DetourHook::DetourHook()
