@@ -26,7 +26,7 @@ namespace Hooking {
 
         DetourHook();
 
-        void *trampoline64(void *src, void *dst, int len);
+        void *trampoline64(byte *src, void *dst, int len);
 
     private:
 

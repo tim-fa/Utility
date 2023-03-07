@@ -3,23 +3,25 @@
 #include <WindowsWrapper/NtWrapper.h>
 #include <Log/Logger.h>
 
+#undef min
 
 struct CodeCave
 {
 	BaseType_t startAddress;
 	BaseType_t size;
+	BaseType_t writeIndex;
 };
 
 class CodeCaveManager
 {
 public:
 
-	static CodeCave findCodeCave(BaseType_t startAddress, size_t size)
+	static CodeCave findCodeCave(BaseType_t startAddress, BaseType_t size)
 	{
 		CodeCave codeCave{ 0, 0 };
-		size_t consecutiveFreeBytes = 0;
+		BaseType_t consecutiveFreeBytes = 0;
 
-		for (size_t byteIndex = 0; byteIndex < INT_MAX * 2U - 1; byteIndex++)
+		for (BaseType_t byteIndex = 0; byteIndex < INT_MAX * 2U - 1; byteIndex++)
 		{
 			byte currentByte = *(byte*)(startAddress + byteIndex);
 			byte nextByte = *(byte*)(startAddress + byteIndex + 1);
@@ -41,12 +43,17 @@ public:
 		return codeCave;
 	}
 
-	static void writeData(const CodeCave& codeCave, byte* dataBuffer, size_t size)
+	static void writeData(CodeCave& codeCave, byte* dataBuffer, BaseType_t size)
 	{
-		if (size > codeCave.size) {
-			Log::Logger::Warning("Code cave is too small for data! {:d} bytes will be lost!", size - codeCave.size);
+		BaseType_t remainingSize = codeCave.size - codeCave.writeIndex;
+
+		if (remainingSize < size)
+		{
+			throw std::length_error("Code cave is too small!");
 		}
-		memcpy_s((void*)codeCave.startAddress, codeCave.size, dataBuffer, size);
+		Log::Logger::Debug("Writing {:d} bytes at index {:d} ({:d} bytes free)", size, codeCave.writeIndex, remainingSize);
+		memcpy_s((void*)(codeCave.startAddress + codeCave.writeIndex), (codeCave.size - codeCave.writeIndex), dataBuffer, size);
+		codeCave.writeIndex += size;
 	}
 
 
@@ -115,9 +122,9 @@ namespace Hooking
 		}
 	}
 
-	void* DetourHook::trampoline64(void* src, void* dst, int len)
+	void* DetourHook::trampoline64(byte* hookAddress, void* dst, int len)
 	{
-		Log::Logger::Info("Installing Hook at 0x{:X}", (BaseType_t)src);
+		Log::Logger::Info("Installing Hook at 0x{:X}", (BaseType_t)hookAddress);
 		int MinLen = 14;
 
 		if (len < MinLen) {
@@ -132,21 +139,22 @@ namespace Hooking
 		//void* pTrampoline = VirtualAlloc(0, len + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 
-		CodeCave cc = CodeCaveManager::findCodeCave((BaseType_t)src, len + sizeof(stub));
+		CodeCave cc = CodeCaveManager::findCodeCave((BaseType_t)hookAddress, len + sizeof(stub));
 
 		Log::Logger::Info("Writing trampoline code to: 0x{:X}", cc.startAddress);
 		DWORD tmp;
 		VirtualProtect((void*)cc.startAddress, len + sizeof(stub), PAGE_EXECUTE_READWRITE, &tmp);
 
 		ULONG dwOld = 0;
-		VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &dwOld);
+		VirtualProtect(hookAddress, len, PAGE_EXECUTE_READWRITE, &dwOld);
 
-		BaseType_t returnAdrToOrig = (BaseType_t)src + len;
+		BaseType_t returnAdrToOrig = (BaseType_t)hookAddress + len;
 
 		// trampoline
 		memcpy(stub + 6, &returnAdrToOrig, 8);
-		memcpy((void*)cc.startAddress, src, len);
-		memcpy((void*)(cc.startAddress + len), stub, sizeof(stub));
+
+		CodeCaveManager::writeData(cc, (byte*)hookAddress, len);
+		CodeCaveManager::writeData(cc, stub, sizeof(stub));
 
 		Log::Logger::Debug("Returning to original code at 0x{:X}", returnAdrToOrig);
 
@@ -156,7 +164,7 @@ namespace Hooking
 			BYTE* currentByte = (BYTE*)(cc.startAddress + i);
 			int relativeJumpInstructionLength = relativeJumpPresent((void*)currentByte);
 			if (relativeJumpInstructionLength) {
-				auto origRelAdrLocation = (void*)((uintptr_t)src + i + relativeJumpInstructionLength);
+				auto origRelAdrLocation = (void*)((uintptr_t)hookAddress + i + relativeJumpInstructionLength);
 				auto trampRelAdrLocation = (void*)&currentByte[relativeJumpInstructionLength];
 				fixRelativeOffset(origRelAdrLocation, trampRelAdrLocation, 4);
 			}
@@ -164,13 +172,13 @@ namespace Hooking
 
 		// orig
 		memcpy(stub + 6, &dst, 8);
-		memcpy(src, stub, sizeof(stub));
+		memcpy(hookAddress, stub, sizeof(stub));
 
 		for (int i = MinLen; i < len; i++) {
-			*(BYTE*)((uintptr_t)src + i) = 0x90;
+			*(BYTE*)((uintptr_t)hookAddress + i) = 0x90;
 		}
 
-		VirtualProtect(src, len, dwOld, &dwOld);
+		VirtualProtect(hookAddress, len, dwOld, &dwOld);
 		Log::Logger::Info("Hook installed successfully");
 		return (void*)cc.startAddress;
 	}
