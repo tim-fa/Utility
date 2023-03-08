@@ -9,13 +9,13 @@ namespace Hooking
 	class RelativeInstructionHandler
 	{
 		struct RelativeInstructionType {
-			RelativeInstructionType(const std::string& instructionName, const std::vector<byte>& bytes, const size_t& offsetLength)
+			RelativeInstructionType(const std::string& instructionName, const std::vector<byte>& bytes, const BaseType_t& offsetLength)
 				: name(instructionName), bytes(bytes), offsetLength(offsetLength) {
 			}
 
 			std::string name;
 			std::vector<byte> bytes;
-			unsigned int offsetLength;
+			BaseType_t offsetLength;
 		};
 
 		struct RelativeInstruction
@@ -34,7 +34,7 @@ namespace Hooking
 		void registerInstruction(const std::string& instructionName, const std::vector<byte>& bytes, const size_t& offsetLength);
 		int extractRelativeOffset(const RelativeInstruction& instruction);
 		void setRelativeOffset(const RelativeInstruction& instruction, BaseType_t relativeOffset);
-		const RelativeInstruction& getRelativeInstruction(BaseType_t address);
+		const RelativeInstruction getRelativeInstruction(BaseType_t address);
 
 
 	private:

@@ -87,7 +87,7 @@ namespace Hooking {
                     currentAddress = currentAddress + offset;
                     first = false;
                 }
-                volatile int value = *(BaseType_t *) currentAddress;
+                volatile auto value = *(BaseType_t *) currentAddress;
             }
             __except(EXCEPTION_EXECUTE_HANDLER)
             {
@@ -100,7 +100,7 @@ namespace Hooking {
         }
 
         BaseType_t currentAddress{0};
-        std::vector<int> offs;
+        std::vector<long> offs;
     };
 
     template<typename DataType>

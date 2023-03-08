@@ -86,7 +86,7 @@ namespace Hooking
 		}
 	}
 
-	const RelativeInstructionHandler::RelativeInstruction& RelativeInstructionHandler::getRelativeInstruction(BaseType_t address)
+	const RelativeInstructionHandler::RelativeInstruction RelativeInstructionHandler::getRelativeInstruction(BaseType_t address)
 	{
 		byte* data = (byte*)address;
 		for (auto& rit : m_relativeInstructionTypes) {
@@ -95,8 +95,7 @@ namespace Hooking
 				isRelative &= data[i] == rit.bytes[i];
 			}
 			if (isRelative) {
-				RelativeInstruction ri{ rit, address };
-				return ri;
+				return RelativeInstruction{ rit, address };
 			}
 		}
 		throw std::runtime_error("No relative instruction was found!");

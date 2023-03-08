@@ -12,7 +12,7 @@ namespace Hooking
 		ULONG retVal;
 		BYTE* jmp = (BYTE*)malloc(len + 5);
 		WindowsWrapper::NtVirtualProtect(src, len, PAGE_READWRITE, retVal);
-		memcpy(jmp, src, len);
+		memcpy_s(jmp, len + 5, src, len);
 		jmp += len;
 		jmp[0] = 0xE9;
 		*(DWORD*)(jmp + 1) = (DWORD)(src + len - jmp) - 5;

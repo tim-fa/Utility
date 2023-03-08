@@ -17,7 +17,7 @@ Win32Element::Win32Element(std::string className, std::string windowName, DWORD 
 	, m_y(y)
 	, m_w(w)
 	, m_h(h)
-	, m_hMenu((HMENU)componentId++)
+	, m_hMenu(reinterpret_cast<HMENU>(componentId++))
 	, m_hInstance(hInstance)
 	, m_param(param)
 	, m_hwnd(hwnd)
@@ -74,7 +74,7 @@ std::vector<std::shared_ptr<Win32Element>>& Win32Element::getSubcomponents()
 
 int Win32Element::getId()
 {
-	return (int)m_hMenu;
+	return reinterpret_cast<int>(m_hMenu);
 }
 
 Button::Button(const std::string& text, int x, int y, int w, int h, CallbackFunction onPressed, bool visible, bool detached, DWORD styles)

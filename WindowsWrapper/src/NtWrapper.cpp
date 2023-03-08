@@ -1,4 +1,5 @@
 #include "WindowsWrapper/NtWrapper.h"
+#include <InternalUtility/Memory/Typedefs.h>
 
 #include <stdexcept>
 
@@ -11,9 +12,9 @@ void init()
 {
 	auto ntHandle = GetModuleHandle("ntdll.dll");
 	if (ntHandle) {
-		auto address = (long)GetProcAddress(ntHandle, "NtProtectVirtualMemory");
+		auto address = (BaseType_t)GetProcAddress(ntHandle, "NtProtectVirtualMemory");
 		if (address) {
-			NtProtectVirtualMemory = (tNtProtectVirtualMemory)address;
+			NtProtectVirtualMemory = reinterpret_cast<tNtProtectVirtualMemory>(address);
 			isInitialized = true;
 		}
 	}

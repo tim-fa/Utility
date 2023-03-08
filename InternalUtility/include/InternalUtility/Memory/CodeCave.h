@@ -17,7 +17,7 @@ namespace Hooking
 	private:
 		BaseType_t m_baseAddress{ 0 };
 		BaseType_t m_size{ 0 };
-		int m_writeOffset{ 0 };
+		BaseType_t m_writeOffset{ 0 };
 	};
 
 }
