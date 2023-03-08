@@ -1,8 +1,4 @@
-#include <InternalUtility/Memory/Typedefs.h>
-#include <InternalUtility/Memory/Detour.h>
-#include <WindowsWrapper/NtWrapper.h>
 #include <Log/Logger.h>
-
 #include <InternalUtility/Memory/CodeCave.h>
 
 #undef min

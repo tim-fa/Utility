@@ -23,47 +23,6 @@ namespace Hooking
 		return (jmp - len);
 	}
 
-	int DetourHook::relativeJumpPresent(void* address)
-	{
-		byte* currentByte = (byte*)address;
-		for (auto& relativeInstruction : m_relativeInstructions) {
-			bool isRelative = true;
-			for (int i = 0; i < relativeInstruction.bytes.size(); i++) {
-				isRelative &= currentByte[i] == relativeInstruction.bytes[i];
-			}
-			if (isRelative) {
-				Log::Logger::Info("Found {:d}-byte '{:s}' instruction with relative address", relativeInstruction.bytes.size(), relativeInstruction.name);
-				return static_cast<int>(relativeInstruction.bytes.size());
-			}
-		}
-		return false;
-	}
-
-	void fixRelativeOffset(void* originalAddress, void* newAddress, int numberOfBytes)
-	{
-		byte* currentByte = (byte*)newAddress;
-		Log::Logger::Debug("Patching relative address at 0x{:X}", (BaseType_t)newAddress);
-		int oldRelativeOffset = 0;
-		// get original relative offset
-		for (int idx = 0; idx < numberOfBytes; idx++) {
-			oldRelativeOffset |= (currentByte[idx] & 0xFF) << (idx * 8);
-		}
-		BaseType_t oldAbsoluteAddress = (BaseType_t)originalAddress + numberOfBytes + oldRelativeOffset;
-		Log::Logger::Debug("Relative function offset 0x{:X} points to 0x{:X}", oldRelativeOffset, oldAbsoluteAddress);
-
-		int newRelativeCalOffs = oldAbsoluteAddress - ((BaseType_t)currentByte + numberOfBytes);
-		BaseType_t newAbsoluteCallAdr = (BaseType_t)currentByte + numberOfBytes + newRelativeCalOffs;
-		Log::Logger::Debug("Relative function offset from instruction in trampoline mem 0x{:X} points to 0x{:X}", newRelativeCalOffs, newAbsoluteCallAdr);
-		if (oldAbsoluteAddress != newAbsoluteCallAdr) {
-			Log::Logger::Error("Cannot fix relative jump address! Relative offset points to wrong address. (Relative offset > 32 bit?)");
-			return;
-		}
-		// write new relative offset
-		for (int idx = 0; idx < numberOfBytes; idx++) {
-			currentByte[idx] = (newRelativeCalOffs >> (idx * 8)) & 0xFF;
-		}
-	}
-
 	void* DetourHook::trampoline64(byte* hookAddress, void* dst, int len)
 	{
 		Log::Logger::Info("Installing Hook at 0x{:X}", (BaseType_t)hookAddress);
@@ -103,12 +62,8 @@ namespace Hooking
 		Log::Logger::Info("Fixing relative addresses");
 		// if there is a call instruction in the source bytes which are moved to the trampoline the relative offsets have to be recalculated
 		for (int i = 0; i < len; i++) {
-			BYTE* currentByte = (BYTE*)(addressToOriginalCode + i);
-			int relativeJumpInstructionLength = relativeJumpPresent((void*)currentByte);
-			if (relativeJumpInstructionLength) {
-				auto origRelAdrLocation = (void*)((uintptr_t)hookAddress + i + relativeJumpInstructionLength);
-				auto trampRelAdrLocation = (void*)&currentByte[relativeJumpInstructionLength];
-				fixRelativeOffset(origRelAdrLocation, trampRelAdrLocation, 4);
+			if (m_instructionHandler.relativeInstructionPresent(addressToOriginalCode + i)) {
+				m_instructionHandler.patch4ByteOperand((BaseType_t)hookAddress + i, addressToOriginalCode + i);
 			}
 		}
 
@@ -125,19 +80,5 @@ namespace Hooking
 		return (void*)addressToOriginalCode;
 	}
 
-	DetourHook::DetourHook()
-	{
-		addRelativeInstruction("CALL", { 0xE8 });
-		addRelativeInstruction("INC", { 0xFF, 0x05 });
-		addRelativeInstruction("MOV", { 0xFF, 0x05 });
-		addRelativeInstruction("MOV", { 0x48, 0x8b, 0x05 });
-		addRelativeInstruction("JNZ", { 0x0F, 0x85 });
-		addRelativeInstruction("LEA", { 0x48, 0x8D, 0x05 });
-	}
 
-
-	void DetourHook::addRelativeInstruction(const std::string& instructionName, const std::vector<byte>& bytes)
-	{
-		m_relativeInstructions.emplace_back(instructionName, bytes);
-	}
 }

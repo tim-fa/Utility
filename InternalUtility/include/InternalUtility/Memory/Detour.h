@@ -8,6 +8,8 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <InternalUtility/Memory/InstructionHandler.h>
+
 
 namespace Hooking {
     extern void *detour(unsigned char *src, const unsigned char *dst, int len);
@@ -23,18 +25,12 @@ namespace Hooking {
         };
 
     public:
-
-        DetourHook();
-
         void *trampoline64(byte *src, void *dst, int len);
 
     private:
 
-        int relativeJumpPresent(void *address);
+        RelativeInstructionHandler m_instructionHandler;
 
-        void addRelativeInstruction(const std::string &instructionName, const std::vector<byte> &bytes);
-
-        std::vector<RelativeInstruction> m_relativeInstructions;
     };
 }
 
