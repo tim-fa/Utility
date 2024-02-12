@@ -1,5 +1,6 @@
 #include "WindowsWrapper/NtWrapper.h"
-#include <InternalUtility/Memory/Typedefs.h>
+#include "InternalUtility/Memory/Typedefs.h"
+
 
 #include <stdexcept>
 

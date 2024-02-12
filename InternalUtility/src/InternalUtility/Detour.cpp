@@ -40,7 +40,7 @@ namespace Hooking
 		//void* pTrampoline = VirtualAlloc(0, len + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 
-		CodeCave cc((BaseType_t)hookAddress, len + sizeof(stub));
+		CodeCave cc((BaseType_t)hookAddress, len + sizeof(stub) + 1);
 
 		Log::Logger::Info("Writing trampoline code to: 0x{:X}", cc.getBaseAddress());
 		DWORD tmp;
@@ -56,6 +56,9 @@ namespace Hooking
 
 		BaseType_t addressToOriginalCode = cc.writeData((byte*)hookAddress, len);
 		cc.writeData(stub, sizeof(stub));
+
+		byte nop[] = {0x90};
+		cc.writeData(nop, 1);
 
 		Log::Logger::Debug("Returning to original code at 0x{:X}", returnAdrToOrig);
 
